@@ -1,0 +1,11 @@
+/Users/mac/Desktop/Desktop/Open source projects/openBank/target/debug/deps/libtoml_write-cc18478c018e8e59.rmeta: /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/lib.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/key.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/string.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/value.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/write.rs
+
+/Users/mac/Desktop/Desktop/Open source projects/openBank/target/debug/deps/libtoml_write-cc18478c018e8e59.rlib: /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/lib.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/key.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/string.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/value.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/write.rs
+
+/Users/mac/Desktop/Desktop/Open source projects/openBank/target/debug/deps/toml_write-cc18478c018e8e59.d: /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/lib.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/key.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/string.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/value.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/write.rs
+
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/lib.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/key.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/string.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/value.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/toml_write-0.1.2/src/write.rs:

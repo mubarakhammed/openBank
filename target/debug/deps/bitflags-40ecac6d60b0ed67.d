@@ -1,0 +1,12 @@
+/Users/mac/Desktop/Desktop/Open source projects/openBank/target/debug/deps/libbitflags-40ecac6d60b0ed67.rmeta: /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/lib.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/iter.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/parser.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/traits.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/public.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/internal.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/external.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/external/serde.rs
+
+/Users/mac/Desktop/Desktop/Open source projects/openBank/target/debug/deps/bitflags-40ecac6d60b0ed67.d: /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/lib.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/iter.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/parser.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/traits.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/public.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/internal.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/external.rs /Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/external/serde.rs
+
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/lib.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/iter.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/parser.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/traits.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/public.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/internal.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/external.rs:
+/Users/mac/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.9.4/src/external/serde.rs:

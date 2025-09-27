@@ -1,0 +1,37 @@
+use axum::{extract::State, response::Json};
+use serde_json::{json, Value};
+use crate::core::{error::AppResult, AppState};
+
+/// Get account balance
+pub async fn get_balance(
+    State(_state): State<AppState>,
+    // TODO: Add user authentication and account extraction
+) -> AppResult<Json<Value>> {
+    // TODO: Implement balance retrieval logic
+    // 1. Authenticate user
+    // 2. Get account ID from user
+    // 3. Fetch current balance from database
+    // 4. Return balance information
+    
+    Ok(Json(json!({
+        "message": "Get balance endpoint - TODO: Implement",
+        "status": "placeholder"
+    })))
+}
+
+/// Get balance history
+pub async fn get_balance_history(
+    State(_state): State<AppState>,
+    // TODO: Add pagination parameters and filters
+) -> AppResult<Json<Value>> {
+    // TODO: Implement balance history logic
+    // 1. Authenticate user
+    // 2. Get account ID from user
+    // 3. Fetch balance history with pagination
+    // 4. Return paginated balance history
+    
+    Ok(Json(json!({
+        "message": "Get balance history endpoint - TODO: Implement",
+        "status": "placeholder"
+    })))
+}
