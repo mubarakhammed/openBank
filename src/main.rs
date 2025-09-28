@@ -9,11 +9,11 @@ mod shared;
 
 // Module declarations
 mod auth;
-mod balance;
 mod identity;
 mod income;
 mod payments;
 mod transactions;
+mod user_data;
 mod virtual_accounts;
 
 use core::config::Config;
@@ -31,7 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .init();
 
     // Load configuration
-    let config = Config::from_env()?;
+    let config = Config::from_env().map_err(|e| e as Box<dyn std::error::Error>)?;
     info!("Configuration loaded successfully");
 
     // Initialize databases (with graceful error handling for development)
@@ -43,7 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => {
             tracing::warn!("Failed to connect to PostgreSQL: {}. Running in development mode without database.", e);
             // For now, we'll exit. In production, you might want to handle this differently
-            return Err(Box::new(e));
+            return Err(e.into());
         }
     };
 
@@ -58,7 +58,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 e
             );
             // For now, we'll exit. In production, you might want to handle this differently
-            return Err(Box::new(e));
+            return Err(e.into());
         }
     };
 
@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         .route("/health", get(health_check))
         .nest("/api/v1/auth", auth::routes())
-        .nest("/api/v1/balance", balance::routes())
+        .nest("/api/v1/user-data", user_data::routes())
         .nest("/api/v1/identity", identity::routes())
         .nest("/api/v1/income", income::routes())
         .nest("/api/v1/payments", payments::routes())
@@ -79,10 +79,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             config,
         });
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:8080").await?;
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:8080")
+        .await
+        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
     info!("Server starting on http://127.0.0.1:8080");
 
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .await
+        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
 
     Ok(())
 }

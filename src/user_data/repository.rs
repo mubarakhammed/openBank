@@ -2,14 +2,14 @@ use async_trait::async_trait;
 use sqlx::PgPool;
 use uuid::Uuid;
 use crate::core::error::AppResult;
-use crate::shared::{traits::Repository, types::AccountId};
-use super::model::{Balance, BalanceHistory};
+use crate::shared::{traits::Repository, types::{AccountId, UserId}};
+use super::model::{Balance, BalanceHistory, UserProfile, UserAccount};
 
-pub struct BalanceRepository {
+pub struct UserDataRepository {
     pool: PgPool,
 }
 
-impl BalanceRepository {
+impl UserDataRepository {
     pub fn new(pool: PgPool) -> Self {
         Self { pool }
     }
@@ -52,10 +52,39 @@ impl BalanceRepository {
 
         Ok(Vec::new())
     }
+
+    /// Find user profile by ID
+    pub async fn find_user_profile(&self, user_id: UserId) -> AppResult<Option<UserProfile>> {
+        // TODO: Implement user profile query
+        let _result = sqlx::query_as::<_, UserProfile>(
+            "SELECT id, email, first_name, last_name, phone, is_verified, created_at, updated_at
+             FROM users WHERE id = $1 AND is_active = true"
+        )
+        .bind(user_id)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(None)
+    }
+
+    /// Find user accounts by user ID
+    pub async fn find_user_accounts(&self, user_id: UserId) -> AppResult<Vec<UserAccount>> {
+        // TODO: Implement user accounts query
+        let _accounts = sqlx::query_as::<_, UserAccount>(
+            "SELECT id, user_id, account_number, account_name, account_type, currency, is_active, created_at, updated_at
+             FROM accounts WHERE user_id = $1 AND is_active = true
+             ORDER BY created_at DESC"
+        )
+        .bind(user_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(Vec::new())
+    }
 }
 
 #[async_trait]
-impl Repository<Balance, Uuid> for BalanceRepository {
+impl Repository<Balance, Uuid> for UserDataRepository {
     async fn create(&self, balance: Balance) -> AppResult<Balance> {
         // TODO: Implement balance creation
         Ok(balance)

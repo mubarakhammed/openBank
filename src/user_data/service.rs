@@ -1,17 +1,17 @@
-use super::model::{BalanceHistory, BalanceResponse};
-use super::repository::BalanceRepository;
+use super::model::{BalanceHistory, BalanceResponse, UserProfile, UserProfileResponse, UserAccount, UserAccountResponse};
+use super::repository::UserDataRepository;
 use crate::core::error::{AppError, AppResult};
 use crate::shared::{
     traits::Repository,
-    types::{AccountId, Amount},
+    types::{AccountId, Amount, UserId},
 };
 
-pub struct BalanceService {
-    repository: BalanceRepository,
+pub struct UserDataService {
+    repository: UserDataRepository,
 }
 
-impl BalanceService {
-    pub fn new(repository: BalanceRepository) -> Self {
+impl UserDataService {
+    pub fn new(repository: UserDataRepository) -> Self {
         Self { repository }
     }
 
@@ -42,8 +42,8 @@ impl BalanceService {
     pub async fn update_balance(
         &self,
         account_id: AccountId,
-        amount: Amount,
-        description: String,
+        _amount: Amount,
+        _description: String,
     ) -> AppResult<BalanceResponse> {
         // TODO: Implement balance update logic
         // 1. Get current balance
@@ -54,5 +54,27 @@ impl BalanceService {
 
         // Placeholder implementation
         self.get_balance(account_id).await
+    }
+
+    /// Get user profile
+    pub async fn get_user_profile(&self, user_id: UserId) -> AppResult<UserProfileResponse> {
+        // TODO: Implement user profile retrieval
+        // 1. Fetch user data from database
+        // 2. Return user profile
+        
+        // Placeholder implementation
+        let _ = user_id;
+        Err(AppError::NotFound("User profile not found".to_string()))
+    }
+
+    /// Get user accounts
+    pub async fn get_user_accounts(&self, user_id: UserId) -> AppResult<Vec<UserAccountResponse>> {
+        // TODO: Implement user accounts retrieval
+        // 1. Fetch all accounts for user
+        // 2. Return account list
+        
+        // Placeholder implementation
+        let _ = user_id;
+        Ok(Vec::new())
     }
 }
