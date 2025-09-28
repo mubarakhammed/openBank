@@ -1,8 +1,7 @@
-use super::model::{BalanceHistory, BalanceResponse, UserProfile, UserProfileResponse, UserAccount, UserAccountResponse};
+use super::model::{BalanceHistory, BalanceResponse, UserProfileResponse, UserAccountResponse};
 use super::repository::UserDataRepository;
 use crate::core::error::{AppError, AppResult};
 use crate::shared::{
-    traits::Repository,
     types::{AccountId, Amount, UserId},
 };
 
