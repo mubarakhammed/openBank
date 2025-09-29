@@ -1,70 +1,208 @@
-use crate::core::{error::AppResult, AppState};
-use axum::{extract::State, response::Json};
-use serde_json::{json, Value};
+use super::model::*;
+use super::service::AuthService;
+use crate::core::error::AppError;
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    response::Json,
+    routing::{get, post},
+    Router,
+};
+use validator::Validate;
 
-/// Register a new user
-pub async fn register(
-    State(_state): State<AppState>,
-    // TODO: Add request body extraction for user registration data
-) -> AppResult<Json<Value>> {
-    // TODO: Implement user registration logic
-    // 1. Validate input data
-    // 2. Check if user already exists
-    // 3. Hash password
-    // 4. Create user in database
-    // 5. Generate JWT token
-    // 6. Return user data and token
-
-    Ok(Json(json!({
-        "message": "User registration endpoint - TODO: Implement",
-        "status": "placeholder"
-    })))
+pub fn routes(auth_service: AuthService) -> Router {
+    Router::new()
+        .route("/developers", post(register_developer))
+        .route("/token", post(oauth_token))
+        .route("/developers/:developer_id/projects", post(create_project))
+        .route("/me", get(get_me))
+        .with_state(auth_service)
 }
 
-/// Login user
-pub async fn login(
-    State(_state): State<AppState>,
-    // TODO: Add request body extraction for login credentials
-) -> AppResult<Json<Value>> {
-    // TODO: Implement user login logic
-    // 1. Validate credentials
-    // 2. Verify password hash
-    // 3. Generate JWT token
-    // 4. Return user data and token
+pub async fn register_developer(
+    State(service): State<AuthService>,
+    Json(request): Json<RegisterDeveloperRequest>,
+) -> Result<(StatusCode, Json<DeveloperResponse>), (StatusCode, Json<ErrorResponse>)> {
+    if let Err(validation_errors) = request.validate() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ErrorResponse {
+                error: "validation_error".to_string(),
+                message: "Invalid request data".to_string(),
+                details: Some(serde_json::to_value(validation_errors).unwrap_or_default()),
+            }),
+        ));
+    }
 
-    Ok(Json(json!({
-        "message": "User login endpoint - TODO: Implement",
-        "status": "placeholder"
-    })))
+    match service.register_developer(request).await {
+        Ok(developer) => Ok((StatusCode::CREATED, Json(developer))),
+        Err(error) => {
+            let (status_code, error_code, message) = match error {
+                AppError::Validation(msg) => (StatusCode::BAD_REQUEST, "validation_error", msg),
+                AppError::Authentication(msg) => {
+                    (StatusCode::UNAUTHORIZED, "authentication_error", msg)
+                }
+                AppError::Authorization(msg) => (StatusCode::FORBIDDEN, "authorization_error", msg),
+                AppError::NotFound(msg) => (StatusCode::NOT_FOUND, "not_found", msg),
+                AppError::Internal(msg) => {
+                    (StatusCode::INTERNAL_SERVER_ERROR, "internal_error", msg)
+                }
+                AppError::Database(err) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "database_error",
+                    err.to_string(),
+                ),
+                AppError::MongoDB(err) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "mongodb_error",
+                    err.to_string(),
+                ),
+                AppError::Conflict(msg) => (StatusCode::CONFLICT, "conflict_error", msg),
+                AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg),
+                AppError::ExternalService(msg) => {
+                    (StatusCode::BAD_GATEWAY, "external_service_error", msg)
+                }
+            };
+
+            Err((
+                status_code,
+                Json(ErrorResponse {
+                    error: error_code.to_string(),
+                    message,
+                    details: None,
+                }),
+            ))
+        }
+    }
 }
 
-/// Refresh JWT token
-pub async fn refresh_token(
-    State(_state): State<AppState>,
-    // TODO: Add token extraction from headers
-) -> AppResult<Json<Value>> {
-    // TODO: Implement token refresh logic
-    // 1. Validate current token
-    // 2. Generate new token
-    // 3. Return new token
+pub async fn oauth_token(
+    State(service): State<AuthService>,
+    Json(request): Json<TokenRequest>,
+) -> Result<(StatusCode, Json<TokenResponse>), (StatusCode, Json<ErrorResponse>)> {
+    if let Err(validation_errors) = request.validate() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ErrorResponse {
+                error: "validation_error".to_string(),
+                message: "Invalid request data".to_string(),
+                details: Some(serde_json::to_value(validation_errors).unwrap_or_default()),
+            }),
+        ));
+    }
 
-    Ok(Json(json!({
-        "message": "Token refresh endpoint - TODO: Implement",
-        "status": "placeholder"
-    })))
+    match service.handle_client_credentials_flow(request).await {
+        Ok(token) => Ok((StatusCode::OK, Json(token))),
+        Err(error) => {
+            let (status_code, error_code, message) = match error {
+                AppError::Validation(msg) => (StatusCode::BAD_REQUEST, "validation_error", msg),
+                AppError::Authentication(msg) => {
+                    (StatusCode::UNAUTHORIZED, "authentication_error", msg)
+                }
+                AppError::Authorization(msg) => (StatusCode::FORBIDDEN, "authorization_error", msg),
+                AppError::NotFound(msg) => (StatusCode::NOT_FOUND, "not_found", msg),
+                AppError::Internal(msg) => {
+                    (StatusCode::INTERNAL_SERVER_ERROR, "internal_error", msg)
+                }
+                AppError::Database(err) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "database_error",
+                    err.to_string(),
+                ),
+                AppError::MongoDB(err) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "mongodb_error",
+                    err.to_string(),
+                ),
+                AppError::Conflict(msg) => (StatusCode::CONFLICT, "conflict_error", msg),
+                AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg),
+                AppError::ExternalService(msg) => {
+                    (StatusCode::BAD_GATEWAY, "external_service_error", msg)
+                }
+            };
+
+            Err((
+                status_code,
+                Json(ErrorResponse {
+                    error: error_code.to_string(),
+                    message,
+                    details: None,
+                }),
+            ))
+        }
+    }
 }
 
-/// Logout user
-pub async fn logout(
-    State(_state): State<AppState>,
-    // TODO: Add token extraction from headers
-) -> AppResult<Json<Value>> {
-    // TODO: Implement logout logic
-    // 1. Invalidate token (add to blacklist)
-    // 2. Clear session data
+pub async fn create_project(
+    State(service): State<AuthService>,
+    Path(developer_id): Path<uuid::Uuid>,
+    Json(request): Json<CreateProjectRequest>,
+) -> Result<(StatusCode, Json<ProjectResponse>), (StatusCode, Json<ErrorResponse>)> {
+    if let Err(validation_errors) = request.validate() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ErrorResponse {
+                error: "validation_error".to_string(),
+                message: "Invalid request data".to_string(),
+                details: Some(serde_json::to_value(validation_errors).unwrap_or_default()),
+            }),
+        ));
+    }
 
-    Ok(Json(json!({
-        "message": "User logout endpoint - TODO: Implement",
-        "status": "placeholder"
-    })))
+    match service.create_project(developer_id, request).await {
+        Ok(project) => Ok((StatusCode::CREATED, Json(project))),
+        Err(error) => {
+            let (status_code, error_code, message) = match error {
+                AppError::Validation(msg) => (StatusCode::BAD_REQUEST, "validation_error", msg),
+                AppError::Authentication(msg) => {
+                    (StatusCode::UNAUTHORIZED, "authentication_error", msg)
+                }
+                AppError::Authorization(msg) => (StatusCode::FORBIDDEN, "authorization_error", msg),
+                AppError::NotFound(msg) => (StatusCode::NOT_FOUND, "not_found", msg),
+                AppError::Internal(msg) => {
+                    (StatusCode::INTERNAL_SERVER_ERROR, "internal_error", msg)
+                }
+                AppError::Database(err) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "database_error",
+                    err.to_string(),
+                ),
+                AppError::MongoDB(err) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "mongodb_error",
+                    err.to_string(),
+                ),
+                AppError::Conflict(msg) => (StatusCode::CONFLICT, "conflict_error", msg),
+                AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg),
+                AppError::ExternalService(msg) => {
+                    (StatusCode::BAD_GATEWAY, "external_service_error", msg)
+                }
+            };
+
+            Err((
+                status_code,
+                Json(ErrorResponse {
+                    error: error_code.to_string(),
+                    message,
+                    details: None,
+                }),
+            ))
+        }
+    }
+}
+
+pub async fn get_me(
+    State(service): State<AuthService>,
+    // TODO: Extract JWT token from Authorization header
+) -> Result<(StatusCode, Json<MeResponse>), (StatusCode, Json<ErrorResponse>)> {
+    // This is a placeholder - you would extract the JWT token from the Authorization header
+    // and verify it using service.verify_access_token()
+    Err((
+        StatusCode::NOT_IMPLEMENTED,
+        Json(ErrorResponse {
+            error: "not_implemented".to_string(),
+            message: "JWT token extraction not implemented yet".to_string(),
+            details: None,
+        }),
+    ))
 }

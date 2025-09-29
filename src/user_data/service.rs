@@ -1,9 +1,7 @@
-use super::model::{BalanceHistory, BalanceResponse, UserProfileResponse, UserAccountResponse};
+use super::model::{BalanceHistory, BalanceResponse, UserAccountResponse, UserProfileResponse};
 use super::repository::UserDataRepository;
 use crate::core::error::{AppError, AppResult};
-use crate::shared::{
-    types::{AccountId, Amount, UserId},
-};
+use crate::shared::types::{AccountId, Amount, UserId};
 
 pub struct UserDataService {
     repository: UserDataRepository,
@@ -60,7 +58,7 @@ impl UserDataService {
         // TODO: Implement user profile retrieval
         // 1. Fetch user data from database
         // 2. Return user profile
-        
+
         // Placeholder implementation
         let _ = user_id;
         Err(AppError::NotFound("User profile not found".to_string()))
@@ -71,7 +69,7 @@ impl UserDataService {
         // TODO: Implement user accounts retrieval
         // 1. Fetch all accounts for user
         // 2. Return account list
-        
+
         // Placeholder implementation
         let _ = user_id;
         Ok(Vec::new())
