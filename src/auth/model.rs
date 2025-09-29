@@ -4,83 +4,190 @@ use sqlx::FromRow;
 use uuid::Uuid;
 use validator::Validate;
 
-/// User model for database
-#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
-pub struct User {
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct Developer {
     pub id: Uuid,
+    pub name: String,
     pub email: String,
     pub password_hash: String,
-    pub first_name: String,
-    pub last_name: String,
-    pub phone: Option<String>,
-    pub is_verified: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ProjectEnvironment {
+    Development,
+    Staging,
+    Production,
+}
+
+impl sqlx::Type<sqlx::Postgres> for ProjectEnvironment {
+    fn type_info() -> sqlx::postgres::PgTypeInfo {
+        <&str as sqlx::Type<sqlx::Postgres>>::type_info()
+    }
+}
+
+impl sqlx::Encode<'_, sqlx::Postgres> for ProjectEnvironment {
+    fn encode_by_ref(&self, buf: &mut sqlx::postgres::PgArgumentBuffer) -> sqlx::encode::IsNull {
+        let s = match self {
+            ProjectEnvironment::Development => "development",
+            ProjectEnvironment::Staging => "staging",
+            ProjectEnvironment::Production => "production",
+        };
+        <&str as sqlx::Encode<sqlx::Postgres>>::encode(s, buf)
+    }
+}
+
+impl<'r> sqlx::Decode<'r, sqlx::Postgres> for ProjectEnvironment {
+    fn decode(value: sqlx::postgres::PgValueRef<'r>) -> Result<Self, sqlx::error::BoxDynError> {
+        let s = <&str as sqlx::Decode<sqlx::Postgres>>::decode(value)?;
+        match s {
+            "development" => Ok(ProjectEnvironment::Development),
+            "staging" => Ok(ProjectEnvironment::Staging),
+            "production" => Ok(ProjectEnvironment::Production),
+            _ => Err(format!("Invalid ProjectEnvironment: {}", s).into()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct Project {
+    pub id: Uuid,
+    pub developer_id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub environment: ProjectEnvironment,
+    pub client_id: String,
+    pub client_secret_hash: String,
+    pub redirect_uris: Vec<String>,
+    pub scopes: Vec<String>,
     pub is_active: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
 
-/// User registration request
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct OAuthToken {
+    pub id: Uuid,
+    pub project_id: Uuid,
+    pub developer_id: Uuid,
+    pub access_token_hash: String,
+    pub token_type: String,
+    pub scopes: Vec<String>,
+    pub expires_at: DateTime<Utc>,
+    pub jti: String,
+    pub created_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Deserialize, Validate)]
-pub struct RegisterRequest {
+pub struct RegisterDeveloperRequest {
+    #[validate(length(min = 2, max = 100))]
+    pub name: String,
     #[validate(email)]
     pub email: String,
     #[validate(length(min = 8))]
     pub password: String,
-    #[validate(length(min = 1))]
-    pub first_name: String,
-    #[validate(length(min = 1))]
-    pub last_name: String,
-    pub phone: Option<String>,
 }
 
-/// User login request
 #[derive(Debug, Deserialize, Validate)]
-pub struct LoginRequest {
-    #[validate(email)]
-    pub email: String,
-    pub password: String,
+pub struct CreateProjectRequest {
+    #[validate(length(min = 2, max = 100))]
+    pub name: String,
+    pub description: Option<String>,
+    pub environment: ProjectEnvironment,
+    pub redirect_uris: Vec<String>,
+    pub scopes: Vec<String>,
 }
 
-/// User response (without sensitive data)
+#[derive(Debug, Deserialize, Validate)]
+pub struct TokenRequest {
+    pub grant_type: String,
+    pub client_id: String,
+    pub client_secret: String,
+    pub scope: Option<String>,
+}
+
 #[derive(Debug, Serialize)]
-pub struct UserResponse {
+pub struct DeveloperResponse {
     pub id: Uuid,
+    pub name: String,
     pub email: String,
-    pub first_name: String,
-    pub last_name: String,
-    pub phone: Option<String>,
-    pub is_verified: bool,
     pub created_at: DateTime<Utc>,
 }
 
-impl From<User> for UserResponse {
-    fn from(user: User) -> Self {
+#[derive(Debug, Serialize)]
+pub struct ProjectResponse {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub environment: ProjectEnvironment,
+    pub client_id: String,
+    pub redirect_uris: Vec<String>,
+    pub scopes: Vec<String>,
+    pub is_active: bool,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct TokenResponse {
+    pub access_token: String,
+    pub token_type: String,
+    pub expires_in: i64,
+    pub scope: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct MeResponse {
+    pub developer_id: Uuid,
+    pub project_id: Uuid,
+    pub scopes: Vec<String>,
+    pub expires_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JwtClaims {
+    pub iss: String,
+    pub aud: String,
+    pub sub: String,
+    pub exp: i64,
+    pub iat: i64,
+    pub jti: String,
+    pub developer_id: Uuid,
+    pub project_id: Uuid,
+    pub scopes: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ErrorResponse {
+    pub error: String,
+    pub message: String,
+    pub details: Option<serde_json::Value>,
+}
+
+impl From<Developer> for DeveloperResponse {
+    fn from(developer: Developer) -> Self {
         Self {
-            id: user.id,
-            email: user.email,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            phone: user.phone,
-            is_verified: user.is_verified,
-            created_at: user.created_at,
+            id: developer.id,
+            name: developer.name,
+            email: developer.email,
+            created_at: developer.created_at,
         }
     }
 }
 
-/// JWT claims
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Claims {
-    pub sub: String, // user id
-    pub email: String,
-    pub exp: usize,
-    pub iat: usize,
-}
-
-/// Authentication response
-#[derive(Debug, Serialize)]
-pub struct AuthResponse {
-    pub user: UserResponse,
-    pub access_token: String,
-    pub token_type: String,
-    pub expires_in: u64,
+impl From<Project> for ProjectResponse {
+    fn from(project: Project) -> Self {
+        Self {
+            id: project.id,
+            name: project.name,
+            description: project.description,
+            environment: project.environment,
+            client_id: project.client_id,
+            redirect_uris: project.redirect_uris,
+            scopes: project.scopes,
+            is_active: project.is_active,
+            created_at: project.created_at,
+        }
+    }
 }

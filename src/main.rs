@@ -17,7 +17,7 @@ mod user_data;
 mod virtual_accounts;
 
 use core::config::Config;
-use core::database::{init_mongodb, init_postgres};
+use core::database::init_mongodb;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -34,8 +34,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Config::from_env().map_err(|e| e as Box<dyn std::error::Error>)?;
     info!("Configuration loaded successfully");
 
-    // Initialize databases (with graceful error handling for development)
-    let postgres_pool = match init_postgres(&config.database_url).await {
+    // Initialize databases (skip migrations for testing)
+    let postgres_pool = match sqlx::postgres::PgPoolOptions::new()
+        .max_connections(10)
+        .min_connections(5)
+        .acquire_timeout(std::time::Duration::from_secs(30))
+        .connect(&config.database_url)
+        .await
+    {
         Ok(pool) => {
             info!("PostgreSQL connection established successfully");
             pool
@@ -62,10 +68,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    info!("Database connections established"); // Build our application with routes
+    info!("Database connections established");
+
+    // Create Auth service for OAuth2 API-as-a-Service
+    let auth_service = auth::service::AuthService::new(
+        auth::repository::AuthRepository::new(postgres_pool.clone()),
+        config.jwt_secret.clone(),
+    );
+
+    // Build our application with routes
     let app = Router::new()
         .route("/health", get(health_check))
-        .nest("/api/v1/auth", auth::routes())
+        // OAuth2 API-as-a-Service Auth routes
+        .nest("/oauth", auth::routes(auth_service.clone()))
+        .with_state(())
+        // Legacy fintech routes (keep existing functionality)
         .nest("/api/v1/user-data", user_data::routes())
         .nest("/api/v1/identity", identity::routes())
         .nest("/api/v1/income", income::routes())

@@ -50,6 +50,18 @@ validator = { version = "0.18", features = ["derive"] }
 # HTTP client
 reqwest = { version = "0.11", features = ["json"] }
 
+# Utilities
+rand = "0.8"
+base64 = "0.22"
+sha2 = "0.10"
+
+# Rate limiting
+governor = "0.6"
+
+# OpenAPI documentation
+utoipa = { version = "4.0", features = ["axum_extras", "chrono", "uuid"] }
+utoipa-swagger-ui = { version = "4.0", features = ["axum"] }
+
 # Async traits
 async-trait = "0.1"
 
