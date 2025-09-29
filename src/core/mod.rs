@@ -1,6 +1,8 @@
 pub mod config;
 pub mod database;
 pub mod error;
+pub mod extractors;
+pub mod response;
 
 use mongodb::Client as MongoClient;
 use sqlx::PgPool;

@@ -1,5 +1,5 @@
-use axum::{http::StatusCode, response::Json, routing::get, Router};
-use serde_json::{json, Value};
+use axum::{response::Json, routing::get, Router};
+use serde::{Deserialize, Serialize};
 use tower_http::cors::CorsLayer;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -108,10 +108,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn health_check() -> Result<Json<Value>, StatusCode> {
-    Ok(Json(json!({
-        "status": "healthy",
-        "service": "openBank",
-        "version": "0.1.0"
-    })))
+#[derive(Serialize, Deserialize)]
+struct HealthData {
+    service: String,
+    version: String,
+    timestamp: String,
+}
+
+async fn health_check() -> Json<core::response::ApiResponse<HealthData>> {
+    let health_data = HealthData {
+        service: "openBank".to_string(),
+        version: "0.1.0".to_string(),
+        timestamp: chrono::Utc::now().to_rfc3339(),
+    };
+
+    Json(core::response::ApiResponse::success(
+        "Service is healthy and operational",
+        health_data,
+    ))
 }

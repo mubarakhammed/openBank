@@ -1,0 +1,531 @@
+{
+    "info": {
+        "_postman_id": "12345678-1234-1234-1234-123456789abc",
+        "name": "OpenBank API Collection",
+        "description": "Complete API testing suite for OpenBank - Banking-as-a-Service platform including OAuth2, payments, accounts, and all core banking APIs",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "12345678"
+    },
+    "item": [
+        {
+            "name": "Health Check",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Response has correct structure\", function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('status');",
+                            "    pm.expect(jsonData).to.have.property('service');",
+                            "    pm.expect(jsonData).to.have.property('version');",
+                            "    pm.expect(jsonData.status).to.eql('healthy');",
+                            "    pm.expect(jsonData.service).to.eql('openBank');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/health",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "health"
+                    ]
+                },
+                "description": "Check if the OpenBank server is running and healthy"
+            },
+            "response": []
+        },
+        {
+            "name": "OAuth2 Authentication",
+            "item": [
+                {
+                    "name": "Register Developer",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has developer data\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('id');",
+                                    "    pm.expect(jsonData).to.have.property('name');",
+                                    "    pm.expect(jsonData).to.have.property('email');",
+                                    "    pm.expect(jsonData).to.have.property('created_at');",
+                                    "    pm.expect(jsonData.name).to.eql(pm.variables.get('developer_name'));",
+                                    "    pm.expect(jsonData.email).to.eql(pm.variables.get('developer_email'));",
+                                    "});",
+                                    "",
+                                    "// Save developer ID for subsequent requests",
+                                    "const jsonData = pm.response.json();",
+                                    "pm.collectionVariables.set('developer_id', jsonData.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Generate unique developer data for testing",
+                                    "const timestamp = Date.now();",
+                                    "pm.variables.set('developer_name', `Test Developer ${timestamp}`);",
+                                    "pm.variables.set('developer_email', `developer${timestamp}@example.com`);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{developer_name}}\",\n    \"email\": \"{{developer_email}}\",\n    \"password\": \"securepassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/oauth/oauth/developers",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "developers"
+                            ]
+                        },
+                        "description": "Register a new developer in the OAuth2 system"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Project",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has project data\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('id');",
+                                    "    pm.expect(jsonData).to.have.property('name');",
+                                    "    pm.expect(jsonData).to.have.property('client_id');",
+                                    "    pm.expect(jsonData).to.have.property('environment');",
+                                    "    pm.expect(jsonData).to.have.property('redirect_uris');",
+                                    "    pm.expect(jsonData).to.have.property('scopes');",
+                                    "    pm.expect(jsonData.name).to.eql('Test API Project');",
+                                    "    pm.expect(jsonData.environment).to.eql('development');",
+                                    "});",
+                                    "",
+                                    "// Extract and save client credentials",
+                                    "const jsonData = pm.response.json();",
+                                    "const clientId = jsonData.client_id;",
+                                    "",
+                                    "// Parse client_id format: \"ck_xxx:cs_yyy\"",
+                                    "const [clientKey, clientSecret] = clientId.split(':');",
+                                    "",
+                                    "pm.collectionVariables.set('project_id', jsonData.id);",
+                                    "pm.collectionVariables.set('client_key', clientKey);",
+                                    "pm.collectionVariables.set('client_secret', clientSecret);",
+                                    "pm.collectionVariables.set('full_client_id', clientId);",
+                                    "",
+                                    "console.log('Client Key:', clientKey);",
+                                    "console.log('Client Secret:', clientSecret.substring(0, 10) + '...');"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Ensure we have a developer_id from the previous request",
+                                    "if (!pm.collectionVariables.get('developer_id')) {",
+                                    "    throw new Error('Please run \"Register Developer\" first to get developer_id');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test API Project\",\n    \"description\": \"A test project for OAuth2 API access\",\n    \"environment\": \"development\",\n    \"redirect_uris\": [\n        \"http://localhost:3000/callback\",\n        \"https://example.com/oauth/callback\"\n    ],\n    \"scopes\": [\n        \"read\",\n        \"write\",\n        \"admin\"\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/oauth/oauth/developers/{{developer_id}}/projects",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "developers",
+                                "{{developer_id}}",
+                                "projects"
+                            ]
+                        },
+                        "description": "Create a new OAuth2 project with client credentials"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get OAuth2 Access Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has token data\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('access_token');",
+                                    "    pm.expect(jsonData).to.have.property('token_type');",
+                                    "    pm.expect(jsonData).to.have.property('expires_in');",
+                                    "    pm.expect(jsonData).to.have.property('scope');",
+                                    "    pm.expect(jsonData.token_type).to.eql('Bearer');",
+                                    "    pm.expect(jsonData.expires_in).to.be.a('number');",
+                                    "});",
+                                    "",
+                                    "// Save access token for API calls",
+                                    "const jsonData = pm.response.json();",
+                                    "pm.collectionVariables.set('access_token', jsonData.access_token);",
+                                    "",
+                                    "console.log('Access Token received (first 20 chars):', jsonData.access_token.substring(0, 20) + '...');"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Ensure we have client credentials from project creation",
+                                    "if (!pm.collectionVariables.get('client_key') || !pm.collectionVariables.get('client_secret')) {",
+                                    "    throw new Error('Please run \"Create Project\" first to get client credentials');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"grant_type\": \"client_credentials\",\n    \"client_id\": \"{{client_key}}\",\n    \"client_secret\": \"{{client_secret}}\",\n    \"scope\": \"read write\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/oauth/oauth/token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "token"
+                            ]
+                        },
+                        "description": "Exchange client credentials for an OAuth2 access token using client_credentials grant"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Validate Access Token (Get Me)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has user data\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('developer_id');",
+                                    "    pm.expect(jsonData).to.have.property('project_id');",
+                                    "    pm.expect(jsonData).to.have.property('scopes');",
+                                    "    pm.expect(jsonData).to.have.property('expires_at');",
+                                    "    pm.expect(jsonData.developer_id).to.eql(pm.collectionVariables.get('developer_id'));",
+                                    "    pm.expect(jsonData.project_id).to.eql(pm.collectionVariables.get('project_id'));",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Ensure we have an access token",
+                                    "if (!pm.collectionVariables.get('access_token')) {",
+                                    "    throw new Error('Please run \"Get OAuth2 Access Token\" first to get an access token');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/oauth/oauth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "me"
+                            ]
+                        },
+                        "description": "Validate the access token and get information about the authenticated client"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Invalid Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response indicates unauthorized\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.include('unauthorized').or.include('invalid_token');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer invalid_token_12345"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/oauth/oauth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "me"
+                            ]
+                        },
+                        "description": "Test API response with an invalid access token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Missing Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response indicates missing authorization\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.include('unauthorized').or.include('missing');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/oauth/oauth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "me"
+                            ]
+                        },
+                        "description": "Test API response when no authorization header is provided"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Invalid Client Credentials",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response indicates invalid credentials\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.include('invalid_client').or.include('unauthorized');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"grant_type\": \"client_credentials\",\n    \"client_id\": \"ck_invalid_client_id\",\n    \"client_secret\": \"cs_invalid_client_secret\",\n    \"scope\": \"read write\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/oauth/oauth/token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "token"
+                            ]
+                        },
+                        "description": "Test token endpoint with invalid client credentials"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "id": "12345678-1234-1234-1234-123456789abc",
+                "type": "text/javascript",
+                "exec": [
+                    "// Global pre-request script",
+                    "console.log('Request:', pm.info.requestName);",
+                    "console.log('URL:', pm.request.url.toString());"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "id": "12345678-1234-1234-1234-123456789def",
+                "type": "text/javascript",
+                "exec": [
+                    "// Global test script",
+                    "console.log('Response Status:', pm.response.status);",
+                    "console.log('Response Time:', pm.response.responseTime + 'ms');"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8080",
+            "type": "string"
+        },
+        {
+            "key": "developer_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "project_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "client_key",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "client_secret",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "full_client_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

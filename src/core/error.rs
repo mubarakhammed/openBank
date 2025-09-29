@@ -1,9 +1,9 @@
+use super::response::{ApiResponse, ErrorResponse};
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
     Json,
 };
-use serde_json::json;
 
 /// Application-wide error type
 #[derive(Debug, thiserror::Error)]
@@ -41,21 +41,39 @@ pub enum AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        let (status, error_message) = match self {
+        let (status, error_message) = match &self {
             AppError::Database(err) => {
                 tracing::error!("Database error: {}", err);
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
+                (StatusCode::INTERNAL_SERVER_ERROR, "Database error")
             }
             AppError::MongoDB(err) => {
                 tracing::error!("MongoDB error: {}", err);
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
+                (StatusCode::INTERNAL_SERVER_ERROR, "MongoDB error")
             }
-            AppError::Validation(ref msg) => (StatusCode::BAD_REQUEST, msg.as_str()),
-            AppError::Authentication(ref msg) => (StatusCode::UNAUTHORIZED, msg.as_str()),
-            AppError::Authorization(ref msg) => (StatusCode::FORBIDDEN, msg.as_str()),
-            AppError::NotFound(ref msg) => (StatusCode::NOT_FOUND, msg.as_str()),
-            AppError::Conflict(ref msg) => (StatusCode::CONFLICT, msg.as_str()),
-            AppError::BadRequest(ref msg) => (StatusCode::BAD_REQUEST, msg.as_str()),
+            AppError::Validation(ref msg) => {
+                tracing::warn!("Validation error: {}", msg);
+                (StatusCode::BAD_REQUEST, "Validation error")
+            }
+            AppError::Authentication(ref msg) => {
+                tracing::warn!("Authentication error: {}", msg);
+                (StatusCode::UNAUTHORIZED, "Authentication error")
+            }
+            AppError::Authorization(ref msg) => {
+                tracing::warn!("Authorization error: {}", msg);
+                (StatusCode::FORBIDDEN, "Authorization error")
+            }
+            AppError::NotFound(ref msg) => {
+                tracing::info!("Not found: {}", msg);
+                (StatusCode::NOT_FOUND, "Not found")
+            }
+            AppError::Conflict(ref msg) => {
+                tracing::warn!("Conflict: {}", msg);
+                (StatusCode::CONFLICT, "Conflict")
+            }
+            AppError::BadRequest(ref msg) => {
+                tracing::warn!("Bad request: {}", msg);
+                (StatusCode::BAD_REQUEST, "Bad request")
+            }
             AppError::Internal(ref msg) => {
                 tracing::error!("Internal error: {}", msg);
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
@@ -66,12 +84,23 @@ impl IntoResponse for AppError {
             }
         };
 
-        let body = Json(json!({
-            "error": error_message,
-            "status": status.as_u16()
-        }));
+        let error_code = match &self {
+            AppError::Database(_) => "DATABASE_ERROR",
+            AppError::MongoDB(_) => "MONGODB_ERROR",
+            AppError::Validation(_) => "VALIDATION_ERROR",
+            AppError::Authentication(_) => "AUTHENTICATION_ERROR",
+            AppError::Authorization(_) => "AUTHORIZATION_ERROR",
+            AppError::NotFound(_) => "NOT_FOUND",
+            AppError::Conflict(_) => "CONFLICT",
+            AppError::BadRequest(_) => "BAD_REQUEST",
+            AppError::Internal(_) => "INTERNAL_ERROR",
+            AppError::ExternalService(_) => "EXTERNAL_SERVICE_ERROR",
+        };
 
-        (status, body).into_response()
+        let response =
+            ApiResponse::<ErrorResponse>::error("Request failed", error_code, error_message);
+
+        (status, Json(response)).into_response()
     }
 }
 
