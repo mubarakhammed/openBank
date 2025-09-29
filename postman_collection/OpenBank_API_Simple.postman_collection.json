@@ -1,0 +1,281 @@
+{
+    "info": {
+        "_postman_id": "12345678-1234-1234-1234-123456789abc",
+        "name": "OpenBank API Collection - Simple",
+        "description": "Simplified API testing suite for OpenBank - Banking-as-a-Service platform with basic OAuth2 endpoints.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "12345678"
+    },
+    "item": [
+        {
+            "name": "Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/health",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "health"
+                    ]
+                },
+                "description": "Check if the OpenBank server is running and healthy"
+            },
+            "response": []
+        },
+        {
+            "name": "Auth Module",
+            "item": [
+                {
+                    "name": "Register Developer",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test Developer\",\n    \"email\": \"developer@example.com\",\n    \"password\": \"securepassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/developers",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "developers"
+                            ]
+                        },
+                        "description": "Register a new developer in the OAuth2 system"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Project",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test API Project\",\n    \"description\": \"A test project for OAuth2 API access\",\n    \"environment\": \"development\",\n    \"redirect_uris\": [\n        \"http://localhost:3000/callback\",\n        \"https://example.com/oauth/callback\"\n    ],\n    \"scopes\": [\n        \"identity\",\n        \"payments\",\n        \"transactions\"\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/developers/{{developer_id}}/projects",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "developers",
+                                "{{developer_id}}",
+                                "projects"
+                            ]
+                        },
+                        "description": "Create a new OAuth2 project with client credentials"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get OAuth2 Access Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"grant_type\": \"client_credentials\",\n    \"client_id\": \"{{client_key}}\",\n    \"client_secret\": \"{{client_secret}}\",\n    \"scope\": \"identity payments\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "token"
+                            ]
+                        },
+                        "description": "Exchange client credentials for an OAuth2 access token using client_credentials grant"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Validate Access Token (Get Me)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Validate the access token and get information about the authenticated client"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Refresh Access Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"client_id\": \"{{client_key}}\",\n    \"client_secret\": \"{{client_secret}}\",\n    \"jti\": \"{{current_jti}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/token/refresh",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "token",
+                                "refresh"
+                            ]
+                        },
+                        "description": "Refresh an existing access token using the JWT ID (jti) from the current token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Invalid Token",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer invalid_token_12345"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Test API response with an invalid access token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Missing Token",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Test API response when no authorization header is provided"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Invalid Client Credentials",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"grant_type\": \"client_credentials\",\n    \"client_id\": \"ck_invalid_client_id\",\n    \"client_secret\": \"cs_invalid_client_secret\",\n    \"scope\": \"identity payments\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "token"
+                            ]
+                        },
+                        "description": "Test token endpoint with invalid client credentials"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8080",
+            "type": "string"
+        },
+        {
+            "key": "developer_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "project_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "client_key",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "client_secret",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "current_jti",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

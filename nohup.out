@@ -1,0 +1,838 @@
+warning: unused import: `crate::core::response::ApiResponse`
+ --> src/core/extractors.rs:2:5
+  |
+2 | use crate::core::response::ApiResponse;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused imports: `IntoResponse`, `Response`, and `http::StatusCode`
+ --> src/core/extractors.rs:6:5
+  |
+6 |     http::StatusCode,
+  |     ^^^^^^^^^^^^^^^^
+7 |     response::{IntoResponse, Response},
+  |                ^^^^^^^^^^^^  ^^^^^^^^
+
+warning: unused import: `ScopeSets`
+ --> src/auth/service.rs:3:27
+  |
+3 | use super::scopes::{self, ScopeSets};
+  |                           ^^^^^^^^^
+
+warning: unused variable: `token`
+  --> src/auth/middleware.rs:39:13
+   |
+39 |         let token = auth_header.strip_prefix("Bearer ").unwr...
+   |             ^^^^^ help: if this is intentional, prefix it with an underscore: `_token`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `id`
+  --> src/user_data/repository.rs:93:32
+   |
+93 | ...fn find_by_id(&self, id: Uuid) -> AppResult<Option<Balanc...
+   |                         ^^ help: if this is intentional, prefix it with an underscore: `_id`
+
+warning: unused variable: `id`
+  --> src/user_data/repository.rs:98:28
+   |
+98 | ...ync fn update(&self, id: Uuid, balance: Balance) -> AppRe...
+   |                         ^^ help: if this is intentional, prefix it with an underscore: `_id`
+
+warning: unused variable: `id`
+   --> src/user_data/repository.rs:103:28
+    |
+103 |     async fn delete(&self, id: Uuid) -> AppResult<()> {
+    |                            ^^ help: if this is intentional, prefix it with an underscore: `_id`
+
+warning: unused variable: `page`
+   --> src/user_data/repository.rs:108:30
+    |
+108 | ...c fn find_all(&self, page: u32, limit: u32) -> AppResult...
+    |                         ^^^^ help: if this is intentional, prefix it with an underscore: `_page`
+
+warning: unused variable: `limit`
+   --> src/user_data/repository.rs:108:41
+    |
+108 | ...ll(&self, page: u32, limit: u32) -> AppResult<Vec<Balanc...
+    |                         ^^^^^ help: if this is intentional, prefix it with an underscore: `_limit`
+
+warning: fields `postgres`, `mongodb`, and `config` are never read
+  --> src/core/mod.rs:12:9
+   |
+11 | pub struct AppState {
+   |            -------- fields in this struct
+12 |     pub postgres: PgPool,
+   |         ^^^^^^^^
+13 |     pub mongodb: MongoClient,
+   |         ^^^^^^^
+14 |     pub config: config::Config,
+   |         ^^^^^^
+   |
+   = note: `AppState` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: multiple fields are never read
+  --> src/core/config.rs:8:9
+   |
+5  | pub struct Config {
+   |            ------ fields in this struct
+...
+8  |     pub host: String,
+   |         ^^^^
+9  |     pub port: u16,
+   |         ^^^^
+10 |     pub jwt_secret: String,
+11 |     pub jwt_expiration: u64,
+   |         ^^^^^^^^^^^^^^
+12 |     pub database_max_connections: u32,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^
+13 |     pub database_min_connections: u32,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^
+14 |     pub bcrypt_cost: u32,
+   |         ^^^^^^^^^^^
+15 |     pub rate_limit_requests_per_minute: u64,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `Config` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: method `server_address` is never used
+  --> src/core/config.rs:51:12
+   |
+18 | impl Config {
+   | ----------- method in this implementation
+...
+51 |     pub fn server_address(&self) -> String {
+   |            ^^^^^^^^^^^^^^
+
+warning: function `init_postgres` is never used
+ --> src/core/database.rs:7:14
+  |
+7 | pub async fn init_postgres(database_url: &str) -> Result<PgPo...
+  |              ^^^^^^^^^^^^^
+
+warning: function `init_postgres_safe` is never used
+  --> src/core/database.rs:25:14
+   |
+25 | pub async fn init_postgres_safe(database_url: &str) -> Resul...
+   |              ^^^^^^^^^^^^^^^^^^
+
+warning: variants `Authorization`, `NotFound`, `Conflict`, and `ExternalService` are never constructed
+  --> src/core/error.rs:24:5
+   |
+10 | pub enum AppError {
+   |          -------- variants in this enum
+...
+24 |     Authorization(String),
+   |     ^^^^^^^^^^^^^
+...
+27 |     NotFound(String),
+   |     ^^^^^^^^
+...
+30 |     Conflict(String),
+   |     ^^^^^^^^
+...
+39 |     ExternalService(String),
+   |     ^^^^^^^^^^^^^^^
+   |
+   = note: `AppError` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: associated functions `success_with_meta` and `pending` are never used
+  --> src/core/response.rs:52:12
+   |
+40 | impl<T> ApiResponse<T> {
+   | ---------------------- associated functions in this implementation
+...
+52 |     pub fn success_with_meta(
+   |            ^^^^^^^^^^^^^^^^^
+...
+66 |     pub fn pending(message: impl Into<String>, data: T) -> S...
+   |            ^^^^^^^
+
+warning: associated function `success_no_data` is never used
+  --> src/core/response.rs:78:12
+   |
+76 | impl ApiResponse<()> {
+   | -------------------- associated function in this implementation
+77 |     /// Create a successful response without data
+78 |     pub fn success_no_data(message: impl Into<String>) -> Se...
+   |            ^^^^^^^^^^^^^^^
+
+warning: associated function `error_with_details` is never used
+   --> src/core/response.rs:108:12
+    |
+88  | impl ApiResponse<ErrorResponse> {
+    | ------------------------------- associated function in this implementation
+...
+108 |     pub fn error_with_details(
+    |            ^^^^^^^^^^^^^^^^^^
+
+warning: method `into_success_response` is never used
+   --> src/core/response.rs:129:8
+    |
+128 | pub trait IntoApiResponse<T> {
+    |           --------------- method in this trait
+129 |     fn into_success_response(self, message: impl Into<Strin...
+    |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `API_VERSION` is never used
+ --> src/shared/constants.rs:2:11
+  |
+2 | pub const API_VERSION: &str = "v1";
+  |           ^^^^^^^^^^^
+
+warning: constant `DEFAULT_CURRENCY` is never used
+ --> src/shared/constants.rs:5:11
+  |
+5 | pub const DEFAULT_CURRENCY: &str = "USD";
+  |           ^^^^^^^^^^^^^^^^
+
+warning: constant `DEFAULT_PAGE_LIMIT` is never used
+ --> src/shared/constants.rs:8:11
+  |
+8 | pub const DEFAULT_PAGE_LIMIT: u32 = 20;
+  |           ^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAX_PAGE_LIMIT` is never used
+  --> src/shared/constants.rs:11:11
+   |
+11 | pub const MAX_PAGE_LIMIT: u32 = 100;
+   |           ^^^^^^^^^^^^^^
+
+warning: constant `JWT_EXPIRATION_SECONDS` is never used
+  --> src/shared/constants.rs:14:11
+   |
+14 | pub const JWT_EXPIRATION_SECONDS: u64 = 3600;
+   |           ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `PASSWORD_MIN_LENGTH` is never used
+  --> src/shared/constants.rs:17:11
+   |
+17 | pub const PASSWORD_MIN_LENGTH: usize = 8;
+   |           ^^^^^^^^^^^^^^^^^^^
+
+warning: constant `ACCOUNT_NUMBER_LENGTH` is never used
+  --> src/shared/constants.rs:20:11
+   |
+20 | pub const ACCOUNT_NUMBER_LENGTH: usize = 10;
+   |           ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `VIRTUAL_ACCOUNT_PREFIX` is never used
+  --> src/shared/constants.rs:23:11
+   |
+23 | pub const VIRTUAL_ACCOUNT_PREFIX: &str = "VA";
+   |           ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `TRANSACTION_REF_PREFIX` is never used
+  --> src/shared/constants.rs:26:11
+   |
+26 | pub const TRANSACTION_REF_PREFIX: &str = "TXN";
+   |           ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAX_TRANSACTION_AMOUNT` is never used
+  --> src/shared/constants.rs:29:11
+   |
+29 | pub const MAX_TRANSACTION_AMOUNT: i64 = 100_000_000;
+   |           ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MIN_TRANSACTION_AMOUNT` is never used
+  --> src/shared/constants.rs:32:11
+   |
+32 | pub const MIN_TRANSACTION_AMOUNT: i64 = 1;
+   |           ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `DEFAULT_RATE_LIMIT` is never used
+  --> src/shared/constants.rs:35:11
+   |
+35 | pub const DEFAULT_RATE_LIMIT: u64 = 60; // requests per minute
+   |           ^^^^^^^^^^^^^^^^^^
+
+warning: constant `USERS` is never used
+  --> src/shared/constants.rs:39:15
+   |
+39 |     pub const USERS: &str = "users";
+   |               ^^^^^
+
+warning: constant `ACCOUNTS` is never used
+  --> src/shared/constants.rs:40:15
+   |
+40 |     pub const ACCOUNTS: &str = "accounts";
+   |               ^^^^^^^^
+
+warning: constant `TRANSACTIONS` is never used
+  --> src/shared/constants.rs:41:15
+   |
+41 |     pub const TRANSACTIONS: &str = "transactions";
+   |               ^^^^^^^^^^^^
+
+warning: constant `VIRTUAL_ACCOUNTS` is never used
+  --> src/shared/constants.rs:42:15
+   |
+42 |     pub const VIRTUAL_ACCOUNTS: &str = "virtual_accounts";
+   |               ^^^^^^^^^^^^^^^^
+
+warning: constant `BALANCES` is never used
+  --> src/shared/constants.rs:43:15
+   |
+43 |     pub const BALANCES: &str = "balances";
+   |               ^^^^^^^^
+
+warning: constant `PAYMENTS` is never used
+  --> src/shared/constants.rs:44:15
+   |
+44 |     pub const PAYMENTS: &str = "payments";
+   |               ^^^^^^^^
+
+warning: constant `IDENTITY_VERIFICATIONS` is never used
+  --> src/shared/constants.rs:45:15
+   |
+45 |     pub const IDENTITY_VERIFICATIONS: &str = "identity_verif...
+   |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `INCOME_VERIFICATIONS` is never used
+  --> src/shared/constants.rs:46:15
+   |
+46 |     pub const INCOME_VERIFICATIONS: &str = "income_verificat...
+   |               ^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `LOGS` is never used
+  --> src/shared/constants.rs:51:15
+   |
+51 |     pub const LOGS: &str = "logs";
+   |               ^^^^
+
+warning: constant `ANALYTICS` is never used
+  --> src/shared/constants.rs:52:15
+   |
+52 |     pub const ANALYTICS: &str = "analytics";
+   |               ^^^^^^^^^
+
+warning: constant `AUDIT_TRAIL` is never used
+  --> src/shared/constants.rs:53:15
+   |
+53 |     pub const AUDIT_TRAIL: &str = "audit_trail";
+   |               ^^^^^^^^^^^
+
+warning: constant `NOTIFICATIONS` is never used
+  --> src/shared/constants.rs:54:15
+   |
+54 |     pub const NOTIFICATIONS: &str = "notifications";
+   |               ^^^^^^^^^^^^^
+
+warning: methods `create`, `find_by_id`, `update`, `delete`, and `find_all` are never used
+  --> src/shared/traits.rs:8:14
+   |
+7  | pub trait Repository<T, ID> {
+   |           ---------- methods in this trait
+8  |     async fn create(&self, entity: T) -> AppResult<T>;
+   |              ^^^^^^
+9  |     async fn find_by_id(&self, id: ID) -> AppResult<Option<T>>;
+   |              ^^^^^^^^^^
+10 |     async fn update(&self, id: ID, entity: T) -> AppResult<T>;
+   |              ^^^^^^
+11 |     async fn delete(&self, id: ID) -> AppResult<()>;
+   |              ^^^^^^
+12 |     async fn find_all(&self, page: u32, limit: u32) -> AppRe...
+   |              ^^^^^^^^
+
+warning: trait `Service` is never used
+  --> src/shared/traits.rs:17:11
+   |
+17 | pub trait Service<T, CreateDto, UpdateDto, ID> {
+   |           ^^^^^^^
+
+warning: trait `Auditable` is never used
+  --> src/shared/traits.rs:26:11
+   |
+26 | pub trait Auditable {
+   |           ^^^^^^^^^
+
+warning: trait `EventPublisher` is never used
+  --> src/shared/traits.rs:32:11
+   |
+32 | pub trait EventPublisher {
+   |           ^^^^^^^^^^^^^^
+
+warning: associated functions `success`, `success_with_message`, and `error` are never used
+  --> src/shared/types.rs:22:12
+   |
+21 | impl<T> ApiResponse<T> {
+   | ---------------------- associated functions in this implementation
+22 |     pub fn success(data: T) -> Self {
+   |            ^^^^^^^
+...
+31 |     pub fn success_with_message(data: T, message: String) ->...
+   |            ^^^^^^^^^^^^^^^^^^^^
+...
+40 |     pub fn error(error: String) -> Self {
+   |            ^^^^^
+
+warning: fields `page` and `limit` are never read
+  --> src/shared/types.rs:54:9
+   |
+52 | pub struct PaginationParams {
+   |            ---------------- fields in this struct
+53 |     #[serde(default = "default_page")]
+54 |     pub page: u32,
+   |         ^^^^
+55 |     #[serde(default = "default_limit")]
+56 |     pub limit: u32,
+   |         ^^^^^
+   |
+   = note: `PaginationParams` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: field `0` is never read
+  --> src/auth/middleware.rs:13:21
+   |
+13 | pub struct JwtToken(pub JwtClaims);
+   |            -------- ^^^^^^^^^^^^^
+   |            |
+   |            field in this struct
+   |
+   = help: consider removing this field
+
+warning: function `jwt_auth_middleware` is never used
+  --> src/auth/middleware.rs:50:14
+   |
+50 | pub async fn jwt_auth_middleware(
+   |              ^^^^^^^^^^^^^^^^^^^
+
+warning: function `extract_claims` is never used
+  --> src/auth/middleware.rs:86:8
+   |
+86 | pub fn extract_claims(req: &Request) -> Option<&JwtClaims> {
+   |        ^^^^^^^^^^^^^^
+
+warning: method `find_developer_by_id` is never used
+  --> src/auth/repository.rs:53:18
+   |
+11 | impl AuthRepository {
+   | ------------------- method in this implementation
+...
+53 |     pub async fn find_developer_by_id(&self, id: Uuid) -> Ap...
+   |                  ^^^^^^^^^^^^^^^^^^^^
+
+warning: method `get_default_scopes_for_project` is never used
+   --> src/auth/service.rs:229:12
+    |
+18  | impl AuthService {
+    | ---------------- method in this implementation
+...
+229 |     pub fn get_default_scopes_for_project(&self, environmen...
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: fields `verification_type`, `document_type`, `document_number`, and `additional_data` are never read
+  --> src/identity/model.rs:39:9
+   |
+38 | pub struct VerificationRequest {
+   |            ------------------- fields in this struct
+39 |     pub verification_type: String,
+   |         ^^^^^^^^^^^^^^^^^
+40 |     pub document_type: String,
+   |         ^^^^^^^^^^^^^
+41 |     pub document_number: String,
+   |         ^^^^^^^^^^^^^^^
+42 |     pub additional_data: Option<serde_json::Value>,
+   |         ^^^^^^^^^^^^^^^
+   |
+   = note: `VerificationRequest` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: field `pool` is never read
+ --> src/identity/repository.rs:9:5
+  |
+8 | pub struct IdentityRepository {
+  |            ------------------ field in this struct
+9 |     pool: PgPool,
+  |     ^^^^
+
+warning: associated items `new`, `find_by_user_id`, and `update_status` are never used
+  --> src/identity/repository.rs:13:12
+   |
+12 | impl IdentityRepository {
+   | ----------------------- associated items in this implementation
+13 |     pub fn new(pool: PgPool) -> Self {
+   |            ^^^
+...
+18 |     pub async fn find_by_user_id(&self, _user_id: UserId) ->...
+   |                  ^^^^^^^^^^^^^^^
+...
+24 |     pub async fn update_status(
+   |                  ^^^^^^^^^^^^^
+
+warning: struct `IdentityService` is never constructed
+  --> src/identity/service.rs:10:12
+   |
+10 | pub struct IdentityService {
+   |            ^^^^^^^^^^^^^^^
+
+warning: associated items `new`, `initiate_verification`, `get_verification_status`, and `get_user_verifications` are never used
+  --> src/identity/service.rs:15:12
+   |
+14 | impl IdentityService {
+   | -------------------- associated items in this implementation
+15 |     pub fn new(repository: IdentityRepository) -> Self {
+   |            ^^^
+...
+20 |     pub async fn initiate_verification(
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+...
+47 |     pub async fn get_verification_status(&self, verification...
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^
+...
+55 |     pub async fn get_user_verifications(&self, user_id: User...
+   |                  ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: fields `verification_type`, `employer_name`, `job_title`, `expected_annual_income`, `currency`, and `additional_data` are never read
+  --> src/income/model.rs:41:9
+   |
+40 | pub struct IncomeVerificationRequest {
+   |            ------------------------- fields in this struct
+41 |     pub verification_type: String,
+   |         ^^^^^^^^^^^^^^^^^
+42 |     pub employer_name: String,
+   |         ^^^^^^^^^^^^^
+43 |     pub job_title: String,
+   |         ^^^^^^^^^
+44 |     pub expected_annual_income: Amount,
+   |         ^^^^^^^^^^^^^^^^^^^^^^
+45 |     pub currency: Currency,
+   |         ^^^^^^^^
+46 |     pub additional_data: Option<serde_json::Value>,
+   |         ^^^^^^^^^^^^^^^
+   |
+   = note: `IncomeVerificationRequest` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: field `pool` is never read
+ --> src/income/repository.rs:9:5
+  |
+8 | pub struct IncomeRepository {
+  |            ---------------- field in this struct
+9 |     pool: PgPool,
+  |     ^^^^
+
+warning: associated items `new`, `find_by_user_id`, and `update_status` are never used
+  --> src/income/repository.rs:13:12
+   |
+12 | impl IncomeRepository {
+   | --------------------- associated items in this implementation
+13 |     pub fn new(pool: PgPool) -> Self {
+   |            ^^^
+...
+18 |     pub async fn find_by_user_id(&self, _user_id: UserId) ->...
+   |                  ^^^^^^^^^^^^^^^
+...
+24 |     pub async fn update_status(
+   |                  ^^^^^^^^^^^^^
+
+warning: struct `IncomeService` is never constructed
+  --> src/income/service.rs:10:12
+   |
+10 | pub struct IncomeService {
+   |            ^^^^^^^^^^^^^
+
+warning: associated items `new`, `initiate_verification`, `get_verification_status`, and `get_user_verifications` are never used
+  --> src/income/service.rs:15:12
+   |
+14 | impl IncomeService {
+   | ------------------ associated items in this implementation
+15 |     pub fn new(repository: IncomeRepository) -> Self {
+   |            ^^^
+...
+20 |     pub async fn initiate_verification(
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+...
+49 |     pub async fn get_verification_status(&self, verification...
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^
+...
+57 |     pub async fn get_user_verifications(&self, user_id: User...
+   |                  ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: fields `to_account_id`, `currency`, `payment_method`, `description`, `recipient_info`, and `metadata` are never read
+  --> src/payments/model.rs:52:9
+   |
+51 | pub struct CreatePaymentRequest {
+   |            -------------------- fields in this struct
+52 |     pub to_account_id: Option<AccountId>,
+   |         ^^^^^^^^^^^^^
+...
+55 |     pub currency: Currency,
+   |         ^^^^^^^^
+56 |     pub payment_method: PaymentMethod,
+   |         ^^^^^^^^^^^^^^
+57 |     pub description: Option<String>,
+   |         ^^^^^^^^^^^
+58 |     pub recipient_info: Option<serde_json::Value>,
+   |         ^^^^^^^^^^^^^^
+59 |     pub metadata: Option<serde_json::Value>,
+   |         ^^^^^^^^
+   |
+   = note: `CreatePaymentRequest` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: field `pool` is never read
+ --> src/payments/repository.rs:9:5
+  |
+8 | pub struct PaymentRepository {
+  |            ----------------- field in this struct
+9 |     pool: PgPool,
+  |     ^^^^
+
+warning: associated items `new`, `find_by_account_id`, and `update_status` are never used
+  --> src/payments/repository.rs:13:12
+   |
+12 | impl PaymentRepository {
+   | ---------------------- associated items in this implementation
+13 |     pub fn new(pool: PgPool) -> Self {
+   |            ^^^
+...
+18 |     pub async fn find_by_account_id(
+   |                  ^^^^^^^^^^^^^^^^^^
+...
+29 |     pub async fn update_status(
+   |                  ^^^^^^^^^^^^^
+
+warning: struct `PaymentService` is never constructed
+  --> src/payments/service.rs:10:12
+   |
+10 | pub struct PaymentService {
+   |            ^^^^^^^^^^^^^^
+
+warning: associated items `new`, `create_payment`, `get_payment`, `get_payments_for_account`, and `cancel_payment` are never used
+  --> src/payments/service.rs:15:12
+   |
+14 | impl PaymentService {
+   | ------------------- associated items in this implementation
+15 |     pub fn new(repository: PaymentRepository) -> Self {
+   |            ^^^
+...
+20 |     pub async fn create_payment(
+   |                  ^^^^^^^^^^^^^^
+...
+49 |     pub async fn get_payment(&self, payment_id: Uuid) -> App...
+   |                  ^^^^^^^^^^^
+...
+57 |     pub async fn get_payments_for_account(
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+68 |     pub async fn cancel_payment(&self, payment_id: Uuid) -> ...
+   |                  ^^^^^^^^^^^^^^
+
+warning: fields `from_account_id`, `to_account_id`, `currency`, `transaction_type`, `description`, and `metadata` are never read
+  --> src/transactions/model.rs:49:9
+   |
+48 | pub struct CreateTransactionRequest {
+   |            ------------------------ fields in this struct
+49 |     pub from_account_id: Option<AccountId>,
+   |         ^^^^^^^^^^^^^^^
+50 |     pub to_account_id: Option<AccountId>,
+   |         ^^^^^^^^^^^^^
+...
+53 |     pub currency: Currency,
+   |         ^^^^^^^^
+54 |     pub transaction_type: TransactionType,
+   |         ^^^^^^^^^^^^^^^^
+55 |     pub description: Option<String>,
+   |         ^^^^^^^^^^^
+56 |     pub metadata: Option<serde_json::Value>,
+   |         ^^^^^^^^
+   |
+   = note: `CreateTransactionRequest` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: fields `from_account_id`, `to_account_id`, `currency`, and `description` are never read
+  --> src/transactions/model.rs:62:9
+   |
+61 | pub struct TransferRequest {
+   |            --------------- fields in this struct
+62 |     pub from_account_id: AccountId,
+   |         ^^^^^^^^^^^^^^^
+63 |     pub to_account_id: AccountId,
+   |         ^^^^^^^^^^^^^
+...
+66 |     pub currency: Currency,
+   |         ^^^^^^^^
+67 |     pub description: Option<String>,
+   |         ^^^^^^^^^^^
+   |
+   = note: `TransferRequest` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: associated items `new`, `find_by_account_id`, and `update_status` are never used
+  --> src/transactions/repository.rs:13:12
+   |
+12 | impl TransactionRepository {
+   | -------------------------- associated items in this implementation
+13 |     pub fn new(pool: PgPool) -> Self {
+   |            ^^^
+...
+18 |     pub async fn find_by_account_id(
+   |                  ^^^^^^^^^^^^^^^^^^
+...
+44 |     pub async fn update_status(
+   |                  ^^^^^^^^^^^^^
+
+warning: struct `TransactionService` is never constructed
+  --> src/transactions/service.rs:11:12
+   |
+11 | pub struct TransactionService {
+   |            ^^^^^^^^^^^^^^^^^^
+
+warning: associated items `new`, `create_transaction`, `transfer_funds`, `get_transaction`, `get_transactions_for_account`, and `update_status` are never used
+  --> src/transactions/service.rs:16:12
+   |
+15 | impl TransactionService {
+   | ----------------------- associated items in this implementation
+16 |     pub fn new(repository: TransactionRepository) -> Self {
+   |            ^^^
+...
+21 |     pub async fn create_transaction(
+   |                  ^^^^^^^^^^^^^^^^^^
+...
+53 |     pub async fn transfer_funds(
+   |                  ^^^^^^^^^^^^^^
+...
+78 |     pub async fn get_transaction(&self, transaction_id: Tran...
+   |                  ^^^^^^^^^^^^^^^
+...
+86 |     pub async fn get_transactions_for_account(
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+97 |     pub async fn update_status(
+   |                  ^^^^^^^^^^^^^
+
+warning: field `pool` is never read
+ --> src/user_data/repository.rs:9:5
+  |
+8 | pub struct UserDataRepository {
+  |            ------------------ field in this struct
+9 |     pool: PgPool,
+  |     ^^^^
+
+warning: associated items `new`, `find_by_account_id`, `get_balance_history`, `find_user_profile`, and `find_user_accounts` are never used
+  --> src/user_data/repository.rs:13:12
+   |
+12 | impl UserDataRepository {
+   | ----------------------- associated items in this implementation
+13 |     pub fn new(pool: PgPool) -> Self {
+   |            ^^^
+...
+18 |     pub async fn find_by_account_id(&self, account_id: Accou...
+   |                  ^^^^^^^^^^^^^^^^^^
+...
+32 |     pub async fn get_balance_history(
+   |                  ^^^^^^^^^^^^^^^^^^^
+...
+57 |     pub async fn find_user_profile(&self, user_id: UserId) -...
+   |                  ^^^^^^^^^^^^^^^^^
+...
+71 |     pub async fn find_user_accounts(&self, user_id: UserId) ...
+   |                  ^^^^^^^^^^^^^^^^^^
+
+warning: struct `UserDataService` is never constructed
+ --> src/user_data/service.rs:6:12
+  |
+6 | pub struct UserDataService {
+  |            ^^^^^^^^^^^^^^^
+
+warning: associated items `new`, `get_balance`, `get_balance_history`, `update_balance`, `get_user_profile`, and `get_user_accounts` are never used
+  --> src/user_data/service.rs:11:12
+   |
+10 | impl UserDataService {
+   | -------------------- associated items in this implementation
+11 |     pub fn new(repository: UserDataRepository) -> Self {
+   |            ^^^
+...
+16 |     pub async fn get_balance(&self, account_id: AccountId) -...
+   |                  ^^^^^^^^^^^
+...
+27 |     pub async fn get_balance_history(
+   |                  ^^^^^^^^^^^^^^^^^^^
+...
+39 |     pub async fn update_balance(
+   |                  ^^^^^^^^^^^^^^
+...
+57 |     pub async fn get_user_profile(&self, user_id: UserId) ->...
+   |                  ^^^^^^^^^^^^^^^^
+...
+68 |     pub async fn get_user_accounts(&self, user_id: UserId) -...
+   |                  ^^^^^^^^^^^^^^^^^
+
+warning: fields `parent_account_id`, `currency`, `purpose`, and `metadata` are never read
+  --> src/virtual_accounts/model.rs:37:9
+   |
+36 | pub struct CreateVirtualAccountRequest {
+   |            --------------------------- fields in this struct
+37 |     pub parent_account_id: AccountId,
+   |         ^^^^^^^^^^^^^^^^^
+...
+40 |     pub currency: Currency,
+   |         ^^^^^^^^
+41 |     pub purpose: Option<String>,
+   |         ^^^^^^^
+42 |     pub metadata: Option<serde_json::Value>,
+   |         ^^^^^^^^
+   |
+   = note: `CreateVirtualAccountRequest` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: field `pool` is never read
+ --> src/virtual_accounts/repository.rs:9:5
+  |
+8 | pub struct VirtualAccountRepository {
+  |            ------------------------ field in this struct
+9 |     pool: PgPool,
+  |     ^^^^
+
+warning: associated items `new`, `find_by_user_id`, `find_by_parent_account_id`, `update_status`, and `generate_account_number` are never used
+  --> src/virtual_accounts/repository.rs:13:12
+   |
+12 | impl VirtualAccountRepository {
+   | ----------------------------- associated items in this implementation
+13 |     pub fn new(pool: PgPool) -> Self {
+   |            ^^^
+...
+18 |     pub async fn find_by_user_id(&self, _user_id: UserId) ->...
+   |                  ^^^^^^^^^^^^^^^
+...
+24 |     pub async fn find_by_parent_account_id(&self, _parent_ac...
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+30 |     pub async fn update_status(
+   |                  ^^^^^^^^^^^^^
+...
+40 |     pub async fn generate_account_number(&self) -> AppResult...
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `VirtualAccountService` is never constructed
+  --> src/virtual_accounts/service.rs:10:12
+   |
+10 | pub struct VirtualAccountService {
+   |            ^^^^^^^^^^^^^^^^^^^^^
+
+warning: associated items `new`, `create_virtual_account`, `get_virtual_account`, `get_user_virtual_accounts`, and `deactivate_virtual_account` are never used
+  --> src/virtual_accounts/service.rs:15:12
+   |
+14 | impl VirtualAccountService {
+   | -------------------------- associated items in this implementation
+15 |     pub fn new(repository: VirtualAccountRepository) -> Self {
+   |            ^^^
+...
+20 |     pub async fn create_virtual_account(
+   |                  ^^^^^^^^^^^^^^^^^^^^^^
+...
+48 |     pub async fn get_virtual_account(&self, account_id: Uuid...
+   |                  ^^^^^^^^^^^^^^^^^^^
+...
+56 |     pub async fn get_user_virtual_accounts(&self, user_id: U...
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+62 |     pub async fn deactivate_virtual_account(&self, account_i...
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `openbank` (bin "openbank") generated 83 warnings (run `cargo fix --bin "openbank"` to apply 3 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.40s
+     Running `target/debug/openbank`
+[2m2025-09-29T20:31:44.587755Z[0m [32m INFO[0m [2mopenbank[0m[2m:[0m Configuration loaded successfully
+[2m2025-09-29T20:31:44.951297Z[0m [32m INFO[0m [2mopenbank[0m[2m:[0m PostgreSQL connection established successfully
+[2m2025-09-29T20:31:44.951496Z[0m [32m INFO[0m [2mopenbank::core::database[0m[2m:[0m Connecting to MongoDB...
+[2m2025-09-29T20:31:44.967996Z[0m [32m INFO[0m [2mopenbank::core::database[0m[2m:[0m MongoDB connection established successfully
+[2m2025-09-29T20:31:44.968153Z[0m [32m INFO[0m [2mopenbank[0m[2m:[0m MongoDB connection established successfully
+[2m2025-09-29T20:31:44.968343Z[0m [32m INFO[0m [2mopenbank[0m[2m:[0m Database connections established
+[2m2025-09-29T20:31:44.969949Z[0m [32m INFO[0m [2mopenbank[0m[2m:[0m Server starting on http://127.0.0.1:8080

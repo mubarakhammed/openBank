@@ -1,10 +1,7 @@
 use crate::core::error::AppError;
-use crate::core::response::ApiResponse;
 use axum::{
     async_trait,
     extract::{FromRequest, Request},
-    http::StatusCode,
-    response::{IntoResponse, Response},
     Json,
 };
 use serde::de::DeserializeOwned;

@@ -70,31 +70,88 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("Database connections established");
 
+    // Initialize Audit Logger with separate MongoDB connection
+    let audit_mongodb_client = match init_mongodb(&config.mongodb_audit_url).await {
+        Ok(client) => {
+            info!("MongoDB audit connection established successfully");
+            client
+        }
+        Err(e) => {
+            tracing::warn!(
+                "Failed to connect to MongoDB audit: {}. Using main MongoDB.",
+                e
+            );
+            mongodb_client.clone()
+        }
+    };
+
+    // Initialize Security Services
+    let audit_logger = core::audit::AuditLogger::new(audit_mongodb_client);
+    let security_config = core::security::SecurityConfig {
+        max_failed_attempts: config.max_failed_attempts,
+        lockout_duration_minutes: config.account_lockout_duration_minutes,
+        progressive_lockout: config.progressive_lockout_enabled,
+        suspicious_activity_threshold: config.suspicious_activity_threshold,
+        password_history_count: config.password_history_count,
+        require_password_change_days: config.require_password_change_days,
+    };
+    let security_service = core::security::AccountSecurityService::new(security_config);
+    let rbac_service = core::rbac::RbacService::new();
+    let rate_limit_config = core::rate_limit::RateLimitConfig {
+        requests_per_minute: config.rate_limit_requests_per_minute as u32,
+        burst_size: config.rate_limit_burst_size,
+        window_size: std::time::Duration::from_secs(config.rate_limit_window_seconds),
+    };
+    let rate_limiter = core::rate_limit::RateLimiter::new(rate_limit_config);
+
+    info!("Security services initialized");
+
     // Create Auth service for OAuth2 API-as-a-Service
     let auth_service = auth::service::AuthService::new(
         auth::repository::AuthRepository::new(postgres_pool.clone()),
         config.jwt_secret.clone(),
     );
 
-    // Build our application with routes
-    let app = Router::new()
+    // Create AppState with all services
+    let app_state = core::AppState {
+        postgres: postgres_pool,
+        mongodb: mongodb_client,
+        config: config.clone(),
+        audit_logger,
+        security_service,
+        rbac_service,
+        rate_limiter,
+    };
+
+    // Build our application with routes and security middleware
+    let fintech_app = Router::new()
         .route("/health", get(health_check))
-        // OAuth2 API-as-a-Service Auth routes
-        .nest("/oauth", auth::routes(auth_service.clone()))
-        .with_state(())
-        // Legacy fintech routes (keep existing functionality)
+        // Legacy fintech routes (with state)
         .nest("/api/v1/user-data", user_data::routes())
         .nest("/api/v1/identity", identity::routes())
         .nest("/api/v1/income", income::routes())
         .nest("/api/v1/payments", payments::routes())
         .nest("/api/v1/transactions", transactions::routes())
         .nest("/api/v1/virtual-accounts", virtual_accounts::routes())
-        .layer(CorsLayer::permissive())
-        .with_state(core::AppState {
-            postgres: postgres_pool,
-            mongodb: mongodb_client,
-            config,
-        });
+        .with_state(app_state.clone());
+
+    // Merge OAuth2 routes (no state) with fintech routes (with state)
+    let app = fintech_app
+        .merge(auth::routes(auth_service.clone()))
+        // Security middleware layers (applied in reverse order)
+        .layer(axum::middleware::from_fn_with_state(
+            app_state.clone(),
+            core::middleware::rbac_middleware,
+        ))
+        .layer(axum::middleware::from_fn_with_state(
+            app_state.clone(),
+            core::middleware::auth_security_middleware,
+        ))
+        .layer(axum::middleware::from_fn_with_state(
+            app_state.clone(),
+            core::middleware::security_middleware,
+        ))
+        .layer(CorsLayer::permissive());
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:8080")
         .await
