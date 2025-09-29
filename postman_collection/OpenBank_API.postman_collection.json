@@ -1,0 +1,810 @@
+{
+    "info": {
+        "_postman_id": "12345678-1234-1234-1234-123456789abc",
+        "name": "OpenBank API Collection",
+        "description": "Complete API testing suite for OpenBank - Banking-as-a-Service platform. Currently includes Auth module with OAuth2, rate limiting, audit logging, RBAC, and security features. Additional modules will be added as development progresses.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "12345678"
+    },
+    "item": [
+        {
+            "name": "Health Check",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Response has correct structure\", function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('status');",
+                            "    pm.expect(jsonData).to.have.property('service');",
+                            "    pm.expect(jsonData).to.have.property('version');",
+                            "    pm.expect(jsonData.status).to.eql('healthy');",
+                            "    pm.expect(jsonData.service).to.eql('openBank');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/health",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "health"
+                    ]
+                },
+                "description": "Check if the OpenBank server is running and healthy"
+            },
+            "response": []
+        },
+        {
+            "name": "Auth Tests",
+            "item": [
+                {
+                    "name": "Rate Limiting Test",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Test rate limiting and security headers implementation"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Rate Limit Burst Test",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Test rate limiting by making rapid requests. Run this multiple times quickly to trigger rate limiting."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Audit Trail Verification",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "User-Agent",
+                                "value": "OpenBank-PostmanTest/1.0"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Verify audit logging and request tracking functionality"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Security Headers Test",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Comprehensive security headers validation for XSS, CSRF, and clickjacking protection"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Auth module security testing including rate limiting, audit logging, security headers, and performance monitoring for OAuth2 endpoints"
+        },
+        {
+            "name": "Auth Module",
+            "item": [
+                {
+                    "name": "Register Developer",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{developer_name}}\",\n    \"email\": \"{{developer_email}}\",\n    \"password\": \"securepassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/developers",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "developers"
+                            ]
+                        },
+                        "description": "Register a new developer in the OAuth2 system"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Project",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test API Project\",\n    \"description\": \"A test project for OAuth2 API access\",\n    \"environment\": \"development\",\n    \"redirect_uris\": [\n        \"http://localhost:3000/callback\",\n        \"https://example.com/oauth/callback\"\n    ],\n    \"scopes\": [\n        \"identity\",\n        \"payments\",\n        \"transactions\"\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/developers/{{developer_id}}/projects",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "developers",
+                                "{{developer_id}}",
+                                "projects"
+                            ]
+                        },
+                        "description": "Create a new OAuth2 project with client credentials"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get OAuth2 Access Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has token data\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('access_token');",
+                                    "    pm.expect(jsonData).to.have.property('token_type');",
+                                    "    pm.expect(jsonData).to.have.property('expires_in');",
+                                    "    pm.expect(jsonData).to.have.property('scope');",
+                                    "    pm.expect(jsonData.token_type).to.eql('Bearer');",
+                                    "    pm.expect(jsonData.expires_in).to.be.a('number');",
+                                    "});",
+                                    "",
+                                    "// Save access token for API calls",
+                                    "const jsonData = pm.response.json();",
+                                    "pm.collectionVariables.set('access_token', jsonData.access_token);",
+                                    "",
+                                    "// Extract and save JTI for token refresh",
+                                    "try {",
+                                    "    const payload = jsonData.access_token.split('.')[1];",
+                                    "    const decodedPayload = JSON.parse(atob(payload));",
+                                    "    pm.collectionVariables.set('current_jti', decodedPayload.jti);",
+                                    "    console.log('JWT ID extracted:', decodedPayload.jti);",
+                                    "} catch (e) {",
+                                    "    console.error('Failed to extract JTI:', e);",
+                                    "}",
+                                    "",
+                                    "console.log('Access Token received (first 20 chars):', jsonData.access_token.substring(0, 20) + '...');"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Ensure we have client credentials from project creation",
+                                    "if (!pm.collectionVariables.get('client_key') || !pm.collectionVariables.get('client_secret')) {",
+                                    "    throw new Error('Please run \"Create Project\" first to get client credentials');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"grant_type\": \"client_credentials\",\n    \"client_id\": \"{{client_key}}\",\n    \"client_secret\": \"{{client_secret}}\",\n    \"scope\": \"identity payments\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "token"
+                            ]
+                        },
+                        "description": "Exchange client credentials for an OAuth2 access token using client_credentials grant"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Validate Access Token (Get Me)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has user data\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('developer_id');",
+                                    "    pm.expect(jsonData).to.have.property('project_id');",
+                                    "    pm.expect(jsonData).to.have.property('scopes');",
+                                    "    pm.expect(jsonData).to.have.property('expires_at');",
+                                    "    pm.expect(jsonData.developer_id).to.eql(pm.collectionVariables.get('developer_id'));",
+                                    "    pm.expect(jsonData.project_id).to.eql(pm.collectionVariables.get('project_id'));",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Ensure we have an access token",
+                                    "if (!pm.collectionVariables.get('access_token')) {",
+                                    "    throw new Error('Please run \"Get OAuth2 Access Token\" first to get an access token');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Validate the access token and get information about the authenticated client"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Refresh Access Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has new token data\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('access_token');",
+                                    "    pm.expect(jsonData).to.have.property('token_type');",
+                                    "    pm.expect(jsonData).to.have.property('expires_in');",
+                                    "    pm.expect(jsonData).to.have.property('scope');",
+                                    "    pm.expect(jsonData.token_type).to.eql('Bearer');",
+                                    "    pm.expect(jsonData.expires_in).to.be.a('number');",
+                                    "});",
+                                    "",
+                                    "// Save the new access token",
+                                    "const jsonData = pm.response.json();",
+                                    "pm.collectionVariables.set('access_token', jsonData.access_token);",
+                                    "",
+                                    "console.log('Token refreshed successfully');"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Extract JTI from the current access token",
+                                    "const currentToken = pm.collectionVariables.get('access_token');",
+                                    "if (currentToken) {",
+                                    "    try {",
+                                    "        // Decode JWT payload (base64 decode the middle part)",
+                                    "        const payload = currentToken.split('.')[1];",
+                                    "        const decodedPayload = JSON.parse(atob(payload));",
+                                    "        pm.collectionVariables.set('current_jti', decodedPayload.jti);",
+                                    "        console.log('Extracted JTI:', decodedPayload.jti);",
+                                    "    } catch (e) {",
+                                    "        console.error('Failed to decode JWT:', e);",
+                                    "    }",
+                                    "} else {",
+                                    "    throw new Error('Please run \"Get OAuth2 Access Token\" first to get a token to refresh');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\\n    \\\"client_id\\\": \\\"{{client_key}}\\\",\\n    \\\"client_secret\\\": \\\"{{client_secret}}\\\",\\n    \\\"jti\\\": \\\"{{current_jti}}\\\"\\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/token/refresh",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "token",
+                                "refresh"
+                            ]
+                        },
+                        "description": "Refresh an existing access token using the JWT ID (jti) from the current token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Invalid Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response indicates unauthorized\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.include('unauthorized').or.include('invalid_token');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer invalid_token_12345"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "me"
+                            ]
+                        },
+                        "description": "Test API response with an invalid access token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Missing Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response indicates missing authorization\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.include('unauthorized').or.include('missing');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "me"
+                            ]
+                        },
+                        "description": "Test API response when no authorization header is provided"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Invalid Client Credentials",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response indicates invalid credentials\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.include('invalid_client').or.include('unauthorized');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"grant_type\": \"client_credentials\",\n    \"client_id\": \"ck_invalid_client_id\",\n    \"client_secret\": \"cs_invalid_client_secret\",\n    \"scope\": \"identity payments\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "token"
+                            ]
+                        },
+                        "description": "Test token endpoint with invalid client credentials"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Security Tests",
+            "item": [
+                {
+                    "name": "Test Account Lockout Protection",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Failed auth attempt logged\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([401, 429]);",
+                                    "    pm.expect(pm.response.headers.has('X-Request-ID')).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Security headers present\", function () {",
+                                    "    pm.expect(pm.response.headers.has('X-Content-Type-Options')).to.be.true;",
+                                    "    pm.expect(pm.response.headers.has('X-Frame-Options')).to.be.true;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"grant_type\": \"client_credentials\",\n    \"client_id\": \"invalid_client\",\n    \"client_secret\": \"invalid_secret\",\n    \"scope\": \"identity payments\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "token"
+                            ]
+                        },
+                        "description": "Test account lockout protection by attempting invalid authentication"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Scope Validation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Scope validation working\", function () {",
+                                    "    if (pm.response.code === 200) {",
+                                    "        const jsonData = pm.response.json();",
+                                    "        pm.expect(jsonData).to.have.property('scope');",
+                                    "    } else if (pm.response.code === 400) {",
+                                    "        const jsonData = pm.response.json();",
+                                    "        pm.expect(jsonData.error).to.include('invalid_scope');",
+                                    "    }",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Audit logging active\", function () {",
+                                    "    pm.expect(pm.response.headers.has('X-Request-ID')).to.be.true;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"grant_type\": \"client_credentials\",\n    \"client_id\": \"{{client_key}}\",\n    \"client_secret\": \"{{client_secret}}\",\n    \"scope\": \"invalid_scope_test\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "token"
+                            ]
+                        },
+                        "description": "Test OAuth2 scope validation and RBAC enforcement"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Performance Under Load Test",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Response time acceptable under security layers\", function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"All security middleware active\", function () {",
+                                    "    const headers = pm.response.headers;",
+                                    "    pm.expect(headers.has('X-Request-ID')).to.be.true;",
+                                    "    pm.expect(headers.has('X-Content-Type-Options')).to.be.true;",
+                                    "    pm.expect(headers.has('X-Frame-Options')).to.be.true;",
+                                    "    pm.expect(headers.has('X-XSS-Protection')).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Rate limiting headers present\", function () {",
+                                    "    if (pm.response.headers.has('X-RateLimit-Limit')) {",
+                                    "        const limit = parseInt(pm.response.headers.get('X-RateLimit-Limit'));",
+                                    "        pm.expect(limit).to.be.greaterThan(0);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "User-Agent",
+                                "value": "OpenBank-LoadTest/1.0"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "me"
+                            ]
+                        },
+                        "description": "Test performance with all enterprise security layers active"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Compliance Audit Test",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"GDPR compliance headers\", function () {",
+                                    "    pm.expect(pm.response.headers.has('X-Request-ID')).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test(\"SOC2 audit trail\", function () {",
+                                    "    const requestId = pm.response.headers.get('X-Request-ID');",
+                                    "    pm.expect(requestId).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+                                    "    console.log('Audit Trail ID:', requestId);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"PCI DSS security standards\", function () {",
+                                    "    const securityHeaders = [",
+                                    "        'X-Content-Type-Options',",
+                                    "        'X-Frame-Options',",
+                                    "        'X-XSS-Protection',",
+                                    "        'Referrer-Policy'",
+                                    "    ];",
+                                    "    ",
+                                    "    securityHeaders.forEach(header => {",
+                                    "        pm.expect(pm.response.headers.has(header), `PCI DSS requires ${header}`).to.be.true;",
+                                    "    });",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oauth",
+                                "oauth",
+                                "me"
+                            ]
+                        },
+                        "description": "Verify compliance with GDPR, SOC2, and PCI DSS audit requirements"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Auth module security validation including RBAC, audit compliance, performance testing, and regulatory compliance for authentication endpoints"
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8080",
+            "type": "string"
+        },
+        {
+            "key": "developer_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "project_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "client_key",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "client_secret",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "full_client_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "current_jti",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

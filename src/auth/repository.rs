@@ -17,17 +17,21 @@ impl AuthRepository {
         &self,
         name: &str,
         email: &str,
+        company: Option<&str>,
+        title: Option<&str>,
         password_hash: &str,
     ) -> AppResult<Developer> {
         let id = Uuid::new_v4();
         let now = chrono::Utc::now();
 
         let developer = sqlx::query_as::<_, Developer>(
-            "INSERT INTO developers (id, name, email, password_hash, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, password_hash, created_at, updated_at"
+            "INSERT INTO developers (id, name, email, company, title, password_hash, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, name, email, company, title, password_hash, created_at, updated_at"
         )
         .bind(id)
         .bind(name)
         .bind(email)
+        .bind(company)
+        .bind(title)
         .bind(password_hash)
         .bind(now)
         .bind(now)
@@ -40,7 +44,7 @@ impl AuthRepository {
 
     pub async fn find_developer_by_email(&self, email: &str) -> AppResult<Option<Developer>> {
         let developer = sqlx::query_as::<_, Developer>(
-            "SELECT id, name, email, password_hash, created_at, updated_at FROM developers WHERE email = $1"
+            "SELECT id, name, email, company, title, password_hash, created_at, updated_at FROM developers WHERE email = $1"
         )
         .bind(email)
         .fetch_optional(&self.pool)
@@ -140,5 +144,19 @@ impl AuthRepository {
         .map_err(|e| crate::core::error::AppError::Database(e))?;
 
         Ok(token)
+    }
+
+    pub async fn get_oauth_token_by_jti(&self, jti: &str) -> AppResult<Option<OAuthToken>> {
+        self.find_oauth_token_by_jti(jti).await
+    }
+
+    pub async fn revoke_oauth_token(&self, jti: &str) -> AppResult<()> {
+        sqlx::query("DELETE FROM oauth_tokens WHERE jti = $1")
+            .bind(jti)
+            .execute(&self.pool)
+            .await
+            .map_err(|e| crate::core::error::AppError::Database(e))?;
+
+        Ok(())
     }
 }

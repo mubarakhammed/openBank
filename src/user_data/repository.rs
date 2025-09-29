@@ -1,9 +1,12 @@
+use super::model::{Balance, BalanceHistory, UserAccount, UserProfile};
+use crate::core::error::AppResult;
+use crate::shared::{
+    traits::Repository,
+    types::{AccountId, UserId},
+};
 use async_trait::async_trait;
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::core::error::AppResult;
-use crate::shared::{traits::Repository, types::{AccountId, UserId}};
-use super::model::{Balance, BalanceHistory, UserProfile, UserAccount};
 
 pub struct UserDataRepository {
     pool: PgPool,
@@ -37,12 +40,12 @@ impl UserDataRepository {
     ) -> AppResult<Vec<BalanceHistory>> {
         // TODO: Implement paginated balance history query
         let offset = (page - 1) * limit;
-        
+
         let _history = sqlx::query_as::<_, BalanceHistory>(
             "SELECT id, account_id, balance_before, balance_after, amount_changed, 
                     transaction_id, description, created_at
              FROM balance_history WHERE account_id = $1 
-             ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+             ORDER BY created_at DESC LIMIT $2 OFFSET $3",
         )
         .bind(account_id)
         .bind(limit as i64)
@@ -58,7 +61,7 @@ impl UserDataRepository {
         // TODO: Implement user profile query
         let _result = sqlx::query_as::<_, UserProfile>(
             "SELECT id, email, first_name, last_name, phone, is_verified, created_at, updated_at
-             FROM users WHERE id = $1 AND is_active = true"
+             FROM users WHERE id = $1 AND is_active = true",
         )
         .bind(user_id)
         .fetch_optional(&self.pool)
@@ -90,23 +93,23 @@ impl Repository<Balance, Uuid> for UserDataRepository {
         Ok(balance)
     }
 
-    async fn find_by_id(&self, id: Uuid) -> AppResult<Option<Balance>> {
-        // TODO: Implement find by ID
+    async fn find_by_id(&self, _id: Uuid) -> AppResult<Option<Balance>> {
+        // Placeholder implementation
         Ok(None)
     }
 
-    async fn update(&self, id: Uuid, balance: Balance) -> AppResult<Balance> {
-        // TODO: Implement balance update
+    async fn update(&self, _id: Uuid, balance: Balance) -> AppResult<Balance> {
+        // Placeholder implementation
         Ok(balance)
     }
 
-    async fn delete(&self, id: Uuid) -> AppResult<()> {
-        // TODO: Implement balance deletion
+    async fn delete(&self, _id: Uuid) -> AppResult<()> {
+        // Placeholder implementation
         Ok(())
     }
 
-    async fn find_all(&self, page: u32, limit: u32) -> AppResult<Vec<Balance>> {
-        // TODO: Implement paginated balance listing
-        Ok(Vec::new())
+    async fn find_all(&self, _page: u32, _limit: u32) -> AppResult<Vec<Balance>> {
+        // Placeholder implementation
+        Ok(vec![])
     }
 }

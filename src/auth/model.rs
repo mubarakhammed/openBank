@@ -9,6 +9,8 @@ pub struct Developer {
     pub id: Uuid,
     pub name: String,
     pub email: String,
+    pub company: Option<String>,
+    pub title: Option<String>,
     pub password_hash: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -86,6 +88,10 @@ pub struct RegisterDeveloperRequest {
     pub name: String,
     #[validate(email)]
     pub email: String,
+    #[validate(length(max = 100))]
+    pub company: Option<String>,
+    #[validate(length(max = 100))]
+    pub title: Option<String>,
     #[validate(length(min = 8))]
     pub password: String,
 }
@@ -108,11 +114,20 @@ pub struct TokenRequest {
     pub scope: Option<String>,
 }
 
+#[derive(Debug, Deserialize, Validate)]
+pub struct RefreshTokenRequest {
+    pub client_id: String,
+    pub client_secret: String,
+    pub jti: String, // Token identifier to refresh
+}
+
 #[derive(Debug, Serialize)]
 pub struct DeveloperResponse {
     pub id: Uuid,
     pub name: String,
     pub email: String,
+    pub company: Option<String>,
+    pub title: Option<String>,
     pub created_at: DateTime<Utc>,
 }
 
@@ -145,7 +160,7 @@ pub struct MeResponse {
     pub expires_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JwtClaims {
     pub iss: String,
     pub aud: String,
@@ -171,6 +186,8 @@ impl From<Developer> for DeveloperResponse {
             id: developer.id,
             name: developer.name,
             email: developer.email,
+            company: developer.company,
+            title: developer.title,
             created_at: developer.created_at,
         }
     }
@@ -190,4 +207,26 @@ impl From<Project> for ProjectResponse {
             created_at: project.created_at,
         }
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ScopeInfo {
+    pub scope: String,
+    pub description: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ScopeSetsInfo {
+    pub basic: Vec<String>,
+    pub banking_app: Vec<String>,
+    pub fintech_platform: Vec<String>,
+    pub identity_service: Vec<String>,
+    pub income_service: Vec<String>,
+    pub full_access: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ScopesResponse {
+    pub scopes: Vec<ScopeInfo>,
+    pub scope_sets: ScopeSetsInfo,
 }
