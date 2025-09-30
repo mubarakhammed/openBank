@@ -112,6 +112,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         config.jwt_secret.clone(),
     );
 
+    // Initialize Identity service
+    let identity_service = match identity::create_identity_service(postgres_pool.clone()).await {
+        Ok(service) => {
+            info!("Identity service initialized successfully");
+            Some(service)
+        }
+        Err(e) => {
+            tracing::warn!(
+                "Failed to initialize identity service: {}. Identity features will be disabled.",
+                e
+            );
+            None
+        }
+    };
+
     // Create AppState with all services
     let app_state = core::AppState {
         postgres: postgres_pool,
@@ -135,9 +150,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .nest("/api/v1/virtual-accounts", virtual_accounts::routes())
         .with_state(app_state.clone());
 
+    // Create auth routes separately (no state)
+    let auth_app = auth::routes(auth_service.clone());
+
     // Merge OAuth2 routes (no state) with fintech routes (with state)
-    let app = fintech_app
-        .merge(auth::routes(auth_service.clone()))
+    let app = Router::new()
+        .merge(fintech_app)
+        .merge(auth_app)
         // Security middleware layers (applied in reverse order)
         .layer(axum::middleware::from_fn_with_state(
             app_state.clone(),

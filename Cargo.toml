@@ -65,5 +65,24 @@ utoipa-swagger-ui = { version = "4.0", features = ["axum"] }
 # Async traits
 async-trait = "0.1"
 
+# ML & Computer Vision
+candle-core = "0.9.1"
+candle-onnx = "0.9.1"
+candle-nn = "0.9.1"
+image = { version = "0.24", features = ["jpeg", "png", "webp"] }
+ndarray = "0.15"
+imageproc = "0.24"  # Image processing without OpenCV
+
+# Vector similarity and embeddings
+pgvector = "0.3"
+
+# Additional security
+ring = "0.17"
+aes-gcm = "0.10"
+
+# File handling and compression
+bytes = "1.5"
+futures = "0.3"
+
 [dev-dependencies]
 tokio-test = "0.4"
