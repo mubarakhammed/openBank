@@ -30,6 +30,7 @@ OpenBank provides enterprise-grade OAuth2 authentication infrastructure designed
 
 ```
 POST /auth/developers              # Register developer account
+POST /auth/login                   # Developer login (dashboard access)
 POST /auth/developers/{id}/projects # Create OAuth2 project
 POST /auth/token                   # Generate access token
 POST /auth/token/refresh           # Refresh existing token
@@ -44,17 +45,22 @@ curl -X POST http://localhost:8080/auth/developers \
   -H "Content-Type: application/json" \
   -d '{"name":"API Developer","email":"dev@company.com","password":"secure123"}'
 
-# 2. Create Project
+# 2. Login to Dashboard
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"dev@company.com","password":"secure123"}'
+
+# 3. Create Project
 curl -X POST http://localhost:8080/auth/developers/{developer_id}/projects \
   -H "Content-Type: application/json" \
   -d '{"name":"Production API","environment":"production","scopes":["identity","payments"]}'
 
-# 3. Get Access Token
+# 4. Get Access Token
 curl -X POST http://localhost:8080/auth/token \
   -H "Content-Type: application/json" \
   -d '{"grant_type":"client_credentials","client_id":"ck_xxx","client_secret":"cs_yyy","scope":"identity payments"}'
 
-# 4. Use Token
+# 5. Use Token
 curl -X GET http://localhost:8080/auth/me \
   -H "Authorization: Bearer {access_token}"
 ```

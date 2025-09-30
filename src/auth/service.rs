@@ -51,6 +51,54 @@ impl AuthService {
         Ok(DeveloperResponse::from(developer))
     }
 
+    pub async fn login_developer(&self, request: LoginRequest) -> AppResult<LoginResponse> {
+        // Find developer by email
+        let developer = self
+            .repository
+            .find_developer_by_email(&request.email)
+            .await?
+            .ok_or_else(|| AppError::Authentication("Invalid credentials".to_string()))?;
+
+        // Verify password
+        if !verify(&request.password, &developer.password_hash)
+            .map_err(|_| AppError::Internal("Password verification failed".to_string()))?
+        {
+            return Err(AppError::Authentication("Invalid credentials".to_string()));
+        }
+
+        // Generate access token for developer session
+        let expires_at = Utc::now() + chrono::Duration::hours(24); // 24 hour session
+        let jti = Uuid::new_v4().to_string();
+
+        let claims = JwtClaims {
+            iss: "openbank-auth".to_string(),
+            aud: "openbank-dashboard".to_string(),
+            sub: developer.id.to_string(),
+            exp: expires_at.timestamp(),
+            iat: Utc::now().timestamp(),
+            jti: jti.clone(),
+            developer_id: developer.id,
+            project_id: Uuid::nil(), // Use nil UUID for developer login (no specific project)
+            scopes: vec!["developer".to_string()], // Developer scope for dashboard access
+        };
+
+        let access_token = encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret(self.jwt_secret.as_ref()),
+        )
+        .map_err(|_| AppError::Internal("Failed to generate token".to_string()))?;
+
+        let developer_response = DeveloperResponse::from(developer);
+
+        Ok(LoginResponse {
+            developer: developer_response,
+            access_token,
+            token_type: "Bearer".to_string(),
+            expires_in: 86400, // 24 hours in seconds
+        })
+    }
+
     pub async fn create_project(
         &self,
         developer_id: Uuid,

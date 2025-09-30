@@ -57,6 +57,34 @@
                     "response": []
                 },
                 {
+                    "name": "Login Developer",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"developer@example.com\",\n    \"password\": \"securepassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login developer for dashboard access - returns developer info and access token"
+                    },
+                    "response": []
+                },
+                {
                     "name": "Create Project",
                     "request": {
                         "method": "POST",
@@ -274,6 +302,11 @@
         },
         {
             "key": "current_jti",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "dashboard_token",
             "value": "",
             "type": "string"
         }

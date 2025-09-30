@@ -15,6 +15,7 @@ use validator::Validate;
 pub fn routes(auth_service: AuthService) -> Router {
     Router::new()
         .route("/developers", post(register_developer))
+        .route("/login", post(login_developer))
         .route("/token", post(oauth_token))
         .route("/token/refresh", post(refresh_token))
         .route("/developers/:developer_id/projects", post(create_project))
@@ -42,6 +43,26 @@ pub async fn register_developer(
                 developer,
             )),
         )),
+        Err(error) => Err(error),
+    }
+}
+
+pub async fn login_developer(
+    State(service): State<AuthService>,
+    ApiJson(request): ApiJson<LoginRequest>,
+) -> Result<Json<ApiResponse<LoginResponse>>, AppError> {
+    if let Err(validation_errors) = request.validate() {
+        return Err(AppError::Validation(format!(
+            "Invalid request data: {:?}",
+            validation_errors
+        )));
+    }
+
+    match service.login_developer(request).await {
+        Ok(login_response) => Ok(Json(ApiResponse::success(
+            "Login successful",
+            login_response,
+        ))),
         Err(error) => Err(error),
     }
 }

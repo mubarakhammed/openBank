@@ -97,6 +97,22 @@ pub struct RegisterDeveloperRequest {
 }
 
 #[derive(Debug, Deserialize, Validate)]
+pub struct LoginRequest {
+    #[validate(email)]
+    pub email: String,
+    #[validate(length(min = 1))]
+    pub password: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct LoginResponse {
+    pub developer: DeveloperResponse,
+    pub access_token: String,
+    pub token_type: String,
+    pub expires_in: i64,
+}
+
+#[derive(Debug, Deserialize, Validate)]
 pub struct CreateProjectRequest {
     #[validate(length(min = 2, max = 100))]
     pub name: String,

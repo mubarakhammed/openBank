@@ -162,6 +162,92 @@
                     "response": []
                 },
                 {
+                    "name": "Login Developer",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Login successful\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.status).to.eql('success');",
+                                    "    pm.expect(jsonData.message).to.include('Login successful');",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has login data\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const data = jsonData.data;",
+                                    "    pm.expect(data).to.have.property('developer');",
+                                    "    pm.expect(data).to.have.property('access_token');",
+                                    "    pm.expect(data).to.have.property('token_type');",
+                                    "    pm.expect(data).to.have.property('expires_in');",
+                                    "    pm.expect(data.token_type).to.eql('Bearer');",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Developer data structure\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const developer = jsonData.data.developer;",
+                                    "    pm.expect(developer).to.have.property('id');",
+                                    "    pm.expect(developer).to.have.property('name');",
+                                    "    pm.expect(developer).to.have.property('email');",
+                                    "    pm.expect(developer).to.have.property('created_at');",
+                                    "});",
+                                    "",
+                                    "// Save login token for dashboard access",
+                                    "const jsonData = pm.response.json();",
+                                    "if (jsonData.status === 'success') {",
+                                    "    pm.collectionVariables.set('dashboard_token', jsonData.data.access_token);",
+                                    "    pm.collectionVariables.set('developer_id', jsonData.data.developer.id);",
+                                    "    console.log('Dashboard token saved for authenticated requests');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Use the same credentials as registration for testing",
+                                    "const timestamp = Date.now();",
+                                    "pm.variables.set('login_email', pm.variables.get('developer_email') || `developer${timestamp}@example.com`);",
+                                    "pm.variables.set('login_password', 'securepassword123');"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"{{login_email}}\",\n    \"password\": \"{{login_password}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login developer for dashboard access - returns developer info and access token for dashboard authentication"
+                    },
+                    "response": []
+                },
+                {
                     "name": "Create Project",
                     "request": {
                         "method": "POST",
@@ -803,6 +889,11 @@
         },
         {
             "key": "current_jti",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "dashboard_token",
             "value": "",
             "type": "string"
         }
